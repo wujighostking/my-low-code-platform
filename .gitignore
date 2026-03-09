@@ -3,6 +3,7 @@
 
 # Package Manager
 node_modules
+.turbo
 .pnpm-debug.log*
 
 # System

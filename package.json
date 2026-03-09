@@ -13,12 +13,12 @@
     "commitlint": "commitlint --edit",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "pnpm -r --filter ./packages/* --if-present run test",
-    "test:run": "pnpm -r --filter ./packages/* --if-present run test:run",
+    "test": "turbo run test",
+    "test:run": "turbo run test:run",
     "preinstall": "npx only-allow pnpm",
-    "build": "pnpm --filter=main run build",
-    "preview": "pnpm --filter=main run preview",
-    "dev": "pnpm --filter=main run dev"
+    "build": "turbo run build",
+    "preview": "turbo run preview --filter=main",
+    "dev": "turbo run dev --filter=main"
   },
   "dependencies": {
     "antd": "^6.3.1",
@@ -46,6 +46,7 @@
     "lint-staged": "^16.3.2",
     "playwright": "^1.58.2",
     "simple-git-hooks": "^2.13.1",
+    "turbo": "^2.8.14",
     "typescript": "^5.9.3",
     "unocss": "^66.6.6",
     "vite": "^7.3.1",
