@@ -14,9 +14,9 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "preinstall": "npx only-allow pnpm",
-    "build": "vite build",
-    "preview": "vite preview",
-    "dev": "vite"
+    "build": "pnpm --filter=main run build",
+    "preview": "pnpm --filter=main run preview",
+    "dev": "pnpm --filter=main run dev"
   },
   "dependencies": {
     "react": "^19.2.4",
