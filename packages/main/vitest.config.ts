@@ -11,7 +11,7 @@ export default mergeConfig(viteConfig, defineConfig({
     css: true,
     browser: {
       enabled: true,
-      headless: !true,
+      headless: true,
       provider: playwright(),
       instances: [
         { browser: 'chromium' },
