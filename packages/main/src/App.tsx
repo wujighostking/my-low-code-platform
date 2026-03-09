@@ -1,9 +1,12 @@
 import { Button } from 'antd'
 
 function App() {
+  const handleClick = () => {
+    console.log('Button clicked!!')
+  }
   return (
     <div>
-      <Button type="primary">Click me</Button>
+      <Button type="dashed" onClick={handleClick}>Click me</Button>
     </div>
   )
 }
