@@ -1,0 +1,23 @@
+{
+  "name": "main",
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.30.3",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    }
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {}
+}
