@@ -23,7 +23,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "dev": "vite",
-    "test": "vitest",
+    "test": "vitest watch",
     "test:run": "vitest run"
   },
   "dependencies": {

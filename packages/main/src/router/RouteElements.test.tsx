@@ -1,16 +1,28 @@
-import { render, screen } from '@testing-library/react'
+import type { ComponentType } from 'react'
+import { act, render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import { page } from 'vitest/browser'
 import { toRouteElement } from './RouteElements'
 
 describe('toRouteElement', () => {
   it('renders lazy component with fallback first', async () => {
-    const routeElement = toRouteElement(async () => ({
-      default: () => <div>Lazy page content</div>,
-    }))
+    interface LazyModule { default: ComponentType }
+    let resolveLazy: ((module: LazyModule) => void) | undefined
+    const lazyModule = new Promise<LazyModule>((resolve) => {
+      resolveLazy = resolve
+    })
+    const routeElement = toRouteElement(() => lazyModule)
 
     render(routeElement)
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-    expect(await screen.findByText('Lazy page content')).toBeInTheDocument()
+    await expect.element(page.getByText('Loading...')).toBeInTheDocument()
+
+    await act(async () => {
+      resolveLazy?.({
+        default: () => <div>Lazy page content</div>,
+      })
+      await lazyModule
+    })
+    await expect.element(page.getByText('Lazy page content')).toBeInTheDocument()
   })
 })
