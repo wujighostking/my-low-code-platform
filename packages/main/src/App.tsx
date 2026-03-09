@@ -1,14 +1,8 @@
-import { Button } from 'antd'
+import { RouterProvider } from 'react-router-dom'
+import router from './router'
 
 function App() {
-  const handleClick = () => {
-    console.log('Button clicked!!')
-  }
-  return (
-    <div>
-      <Button type="dashed" onClick={handleClick}>Click me</Button>
-    </div>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App

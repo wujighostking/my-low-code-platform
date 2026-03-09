@@ -23,5 +23,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "dev": "vite"
+  },
+  "dependencies": {
+    "react-router-dom": "^7.13.1"
   }
 }
