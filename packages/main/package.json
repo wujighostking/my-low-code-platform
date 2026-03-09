@@ -23,8 +23,5 @@
     "build": "vite build",
     "preview": "vite preview",
     "dev": "vite"
-  },
-  "dependencies": {
-    "@unocss/reset": "^66.6.6"
   }
 }
