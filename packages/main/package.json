@@ -22,7 +22,9 @@
   "scripts": {
     "build": "vite build",
     "preview": "vite preview",
-    "dev": "vite"
+    "dev": "vite",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "react-router-dom": "^7.13.1"

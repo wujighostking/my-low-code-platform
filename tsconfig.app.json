@@ -14,7 +14,7 @@
     "paths": {
       "@/*": ["packages/main/src/*"]
     },
-    "types": ["vite/client"],
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "allowImportingTsExtensions": true,
 
     /* Linting */
