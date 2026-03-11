@@ -30,14 +30,14 @@ function HomeCenterPanel() {
           }`}
           style={{ width, height, position: 'relative' }}
         >
-          {blocks.map((block, index) => {
+          {blocks.map((block) => {
             const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
             if (!config)
               return null
 
             return (
               <div
-                key={`${block.key}-${index}`}
+                key={`${block.key}`}
                 style={{
                   position: 'absolute',
                   top: block.top,
