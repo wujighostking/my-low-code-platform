@@ -1,26 +1,11 @@
-import type { MouseEvent as ReactMouseEvent } from 'react'
 import { Layout } from 'antd'
-import { useEffect, useRef, useState } from 'react'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
+import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
 import { registerConfig } from '@/utils/editorConfig'
 
 const { Header, Content } = Layout
 
-interface DraggingState {
-  startClientX: number
-  startClientY: number
-  startPositions: Array<{
-    index: number
-    top: number
-    left: number
-  }>
-}
-
 function HomeCenterPanel() {
-  const [selectedBlockIndexes, setSelectedBlockIndexes] = useState<number[]>([])
-  const [draggingBlockIndexes, setDraggingBlockIndexes] = useState<number[]>([])
-  const draggingRef = useRef<DraggingState | null>(null)
-
   const {
     isDragOver,
     blocks,
@@ -32,73 +17,18 @@ function HomeCenterPanel() {
     updateBlockPositions,
   } = useCanvasDrop()
 
-  useEffect(() => {
-    function handleMouseMove(event: MouseEvent) {
-      const dragging = draggingRef.current
-      if (!dragging)
-        return
-
-      const deltaX = event.clientX - dragging.startClientX
-      const deltaY = event.clientY - dragging.startClientY
-      updateBlockPositions(
-        dragging.startPositions.map(({ index, top, left }) => ({
-          index,
-          top: top + deltaY,
-          left: left + deltaX,
-        })),
-      )
-    }
-
-    function handleMouseUp() {
-      if (!draggingRef.current)
-        return
-
-      draggingRef.current = null
-      setDraggingBlockIndexes([])
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [updateBlockPositions])
-
-  function handleBlockMouseDown(event: ReactMouseEvent<HTMLDivElement>, index: number) {
-    event.stopPropagation()
-    if (event.button !== 0)
-      return
-
-    const isCurrentSelected = selectedBlockIndexes.includes(index)
-    const nextSelectedBlockIndexes = event.shiftKey
-      ? (isCurrentSelected ? selectedBlockIndexes : [...selectedBlockIndexes, index])
-      : (isCurrentSelected ? selectedBlockIndexes : [index])
-
-    const startPositions = nextSelectedBlockIndexes
-      .map((selectedIndex) => {
-        const selectedBlock = blocks[selectedIndex]
-        if (!selectedBlock)
-          return null
-
-        return {
-          index: selectedIndex,
-          top: selectedBlock.top,
-          left: selectedBlock.left,
-        }
-      })
-      .filter((position): position is { index: number, top: number, left: number } => position !== null)
-
-    event.preventDefault()
-    setSelectedBlockIndexes(nextSelectedBlockIndexes)
-    draggingRef.current = {
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startPositions,
-    }
-    setDraggingBlockIndexes(nextSelectedBlockIndexes)
-  }
+  const {
+    selectedBlockIndexes,
+    draggingBlockIndexes,
+    guideLines,
+    setBlockElement,
+    clearSelection,
+    handleBlockMouseDown,
+  } = useCanvasSelectionDrag({
+    blocks,
+    canvasRef,
+    updateBlockPositions,
+  })
 
   const renderBlock = (block: (typeof blocks)[number], index: number) => {
     const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
@@ -111,6 +41,7 @@ function HomeCenterPanel() {
     return (
       <div
         key={`${block.key}-${index}`}
+        ref={element => setBlockElement(index, element)}
         onMouseDown={event => handleBlockMouseDown(event, index)}
         onClick={event => event.stopPropagation()}
         className="rounded-md select-none"
@@ -128,6 +59,47 @@ function HomeCenterPanel() {
     )
   }
 
+  const renderVerticalGuideLine = () => {
+    if (guideLines.vertical === null)
+      return null
+
+    return (
+      <div
+        className="pointer-events-none absolute bg-[#1677ff]"
+        style={{
+          top: 0,
+          left: guideLines.vertical,
+          width: 1,
+          height: '100%',
+        }}
+      />
+    )
+  }
+
+  const renderHorizontalGuideLine = () => {
+    if (guideLines.horizontal === null)
+      return null
+
+    return (
+      <div
+        className="pointer-events-none absolute bg-[#1677ff]"
+        style={{
+          top: guideLines.horizontal,
+          left: 0,
+          width: '100%',
+          height: 1,
+        }}
+      />
+    )
+  }
+
+  const renderGuideLines = () => (
+    <>
+      {renderVerticalGuideLine()}
+      {renderHorizontalGuideLine()}
+    </>
+  )
+
   return (
     <Layout>
       <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between" />
@@ -138,13 +110,14 @@ function HomeCenterPanel() {
           onDragOver={handleCanvasDragOver}
           onDragLeave={handleCanvasDragLeave}
           onDrop={handleCanvasDrop}
-          onClick={() => setSelectedBlockIndexes([])}
+          onClick={clearSelection}
           className={`mx-auto rounded-xl border border-dashed bg-white transition-colors ${
             isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'
           }`}
           style={{ width, height, position: 'relative' }}
         >
           {blocks.map(renderBlock)}
+          {renderGuideLines()}
         </div>
       </Content>
     </Layout>
