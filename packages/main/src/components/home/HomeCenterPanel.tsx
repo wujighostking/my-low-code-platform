@@ -1,14 +1,107 @@
+import type { DragEvent } from 'react'
 import { Layout } from 'antd'
+import { useEffect, useRef, useState } from 'react'
+import editorData from '@/../public/data/data.json'
+import { registerConfig } from '@/utils/editorConfig'
 
 const { Header, Content } = Layout
 
+interface Block {
+  top: number
+  left: number
+  zIndex: number
+  key: string
+}
+
 function HomeCenterPanel() {
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [blocks, setBlocks] = useState<Block[]>(editorData.blocks)
+  const canvasRef = useRef<HTMLDivElement>(null)
+
+  const { width, height } = editorData.container
+
+  /** 拖拽悬停：阻止默认行为以允许放置，设置视觉反馈 */
+  function handleCanvasDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+    setIsDragOver(true)
+  }
+
+  /** 拖拽离开：重置悬停状态 */
+  function handleCanvasDragLeave() {
+    setIsDragOver(false)
+  }
+
+  /** 放置：解析物料 key，计算相对画布的位置，添加到 blocks */
+  function handleCanvasDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    setIsDragOver(false)
+
+    const key = event.dataTransfer.getData('key')
+    if (!key || !registerConfig.componentMap.has(key as Parameters<typeof registerConfig.componentMap.has>[0]))
+      return
+
+    const rect = canvasRef.current!.getBoundingClientRect()
+
+    setBlocks(prev => [...prev, {
+      top: event.clientY - rect.top,
+      left: event.clientX - rect.left,
+      zIndex: 1,
+      key,
+    }])
+  }
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas)
+      return
+
+    const children = canvas.children
+    blocks.forEach((block, index) => {
+      const el = children[index] as HTMLElement | undefined
+      if (!el || el.dataset.aligned)
+        return
+      const { offsetWidth, offsetHeight } = el
+      el.style.top = `${block.top - offsetHeight / 2}px`
+      el.style.left = `${block.left - offsetWidth / 2}px`
+      el.dataset.aligned = '1'
+    })
+  }, [blocks])
+
   return (
     <Layout>
-      <Header className="bg-white border-b border-[#f0f0f0] px-4" />
+      <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between" />
 
       <Content className="p-4 overflow-auto">
-        <div className="max-w-[860px] mx-auto min-h-[calc(100vh-120px)] rounded-xl border border-dashed border-[#d9d9d9] bg-white p-6">
+        <div
+          ref={canvasRef}
+          onDragOver={handleCanvasDragOver}
+          onDragLeave={handleCanvasDragLeave}
+          onDrop={handleCanvasDrop}
+          className={`mx-auto rounded-xl border border-dashed bg-white transition-colors ${
+            isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'
+          }`}
+          style={{ width, height, position: 'relative' }}
+        >
+          {blocks.map((block, index) => {
+            const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
+            if (!config)
+              return null
+
+            return (
+              <div
+                key={`${block.key}-${index}`}
+                style={{
+                  position: 'absolute',
+                  top: block.top,
+                  left: block.left,
+                  zIndex: block.zIndex,
+                }}
+              >
+                {config.render()}
+              </div>
+            )
+          })}
         </div>
       </Content>
     </Layout>
