@@ -15,6 +15,26 @@ function HomeCenterPanel() {
     handleCanvasDrop,
   } = useCanvasDrop()
 
+  const renderBlock = (block: (typeof blocks)[number]) => {
+    const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
+    if (!config)
+      return null
+
+    return (
+      <div
+        key={`${block.key}`}
+        style={{
+          position: 'absolute',
+          top: block.top,
+          left: block.left,
+          zIndex: block.zIndex,
+        }}
+      >
+        {config.render()}
+      </div>
+    )
+  }
+
   return (
     <Layout>
       <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between" />
@@ -30,25 +50,7 @@ function HomeCenterPanel() {
           }`}
           style={{ width, height, position: 'relative' }}
         >
-          {blocks.map((block) => {
-            const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
-            if (!config)
-              return null
-
-            return (
-              <div
-                key={`${block.key}`}
-                style={{
-                  position: 'absolute',
-                  top: block.top,
-                  left: block.left,
-                  zIndex: block.zIndex,
-                }}
-              >
-                {config.render()}
-              </div>
-            )
-          })}
+          {blocks.map(renderBlock)}
         </div>
       </Content>
     </Layout>
