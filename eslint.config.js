@@ -7,6 +7,7 @@ export default defineConfig(
     react: true,
     pnpm: true,
     typescript: true,
+    ignores: ['.codex'],
   },
   {
     rules: {
