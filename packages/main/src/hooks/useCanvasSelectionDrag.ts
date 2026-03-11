@@ -1,6 +1,6 @@
-import type { MouseEvent as ReactMouseEvent, MutableRefObject } from 'react'
-import { useCallback } from 'react'
+import type { MouseEvent as ReactMouseEvent, RefObject } from 'react'
 import type { Block } from '@/hooks/useCanvasDrop'
+import { useCallback } from 'react'
 import { useCanvasSelection } from '@/hooks/useCanvasSelection'
 import { useCanvasSnapDrag } from '@/hooks/useCanvasSnapDrag'
 
@@ -12,7 +12,7 @@ interface BlockPositionUpdate {
 
 interface UseCanvasSelectionDragOptions {
   blocks: Block[]
-  canvasRef: MutableRefObject<HTMLDivElement | null>
+  canvasRef: RefObject<HTMLDivElement | null>
   updateBlockPositions: (updates: BlockPositionUpdate[]) => void
 }
 

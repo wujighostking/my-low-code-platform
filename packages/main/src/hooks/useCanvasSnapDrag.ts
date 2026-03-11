@@ -1,6 +1,6 @@
-import type { MouseEvent as ReactMouseEvent, MutableRefObject } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import type { MouseEvent as ReactMouseEvent, RefObject } from 'react'
 import type { Block } from '@/hooks/useCanvasDrop'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const SNAP_THRESHOLD = 5
 
@@ -47,7 +47,7 @@ interface BlockPositionUpdate {
 
 interface UseCanvasSnapDragOptions {
   blocks: Block[]
-  canvasRef: MutableRefObject<HTMLDivElement | null>
+  canvasRef: RefObject<HTMLDivElement | null>
   updateBlockPositions: (updates: BlockPositionUpdate[]) => void
   getBlockElement: (index: number) => HTMLDivElement | undefined
   onDragEnd: () => void
