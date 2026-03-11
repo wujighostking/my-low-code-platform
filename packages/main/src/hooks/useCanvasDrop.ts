@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import editorData from '@/../public/data/data.json'
 import { registerConfig } from '@/utils/editorConfig'
 
@@ -8,6 +8,12 @@ export interface Block {
   left: number
   zIndex: number
   key: string
+}
+
+interface BlockPositionUpdate {
+  index: number
+  top: number
+  left: number
 }
 
 export function useCanvasDrop() {
@@ -48,6 +54,34 @@ export function useCanvasDrop() {
     }])
   }
 
+  const updateBlockPositions = useCallback((updates: BlockPositionUpdate[]) => {
+    if (updates.length === 0)
+      return
+
+    setBlocks((prev) => {
+      const next = [...prev]
+      let changed = false
+
+      updates.forEach(({ index, top, left }) => {
+        const current = next[index]
+        if (!current)
+          return
+
+        if (current.top === top && current.left === left)
+          return
+
+        next[index] = { ...current, top, left }
+        changed = true
+      })
+
+      return changed ? next : prev
+    })
+  }, [])
+
+  const updateBlockPosition = useCallback((index: number, top: number, left: number) => {
+    updateBlockPositions([{ index, top, left }])
+  }, [updateBlockPositions])
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas)
@@ -73,5 +107,7 @@ export function useCanvasDrop() {
     handleCanvasDragOver,
     handleCanvasDragLeave,
     handleCanvasDrop,
+    updateBlockPositions,
+    updateBlockPosition,
   }
 }
