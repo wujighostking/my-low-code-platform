@@ -33,7 +33,7 @@ function HomeLeftPanel() {
               <div
                 inert
                 aria-hidden
-                className="rounded-md border border-dashed border-[#d9d9d9] bg-white p-2 pointer-events-none center"
+                className="center"
               >
                 {material.preview()}
               </div>
