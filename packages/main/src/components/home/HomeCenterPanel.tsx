@@ -1,9 +1,12 @@
-import { RedoOutlined, UndoOutlined } from '@ant-design/icons'
+import { ExportOutlined, ImportOutlined, RedoOutlined, UndoOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Tooltip } from 'antd'
 import { useEffect } from 'react'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
 import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
+import { useImportExport } from '@/hooks/useImportExport'
 import { registerConfig } from '@/utils/editorConfig'
+import ExportModal from './ExportModal'
+import ImportModal from './ImportModal'
 
 const { Header, Content } = Layout
 
@@ -11,6 +14,7 @@ function HomeCenterPanel() {
   const {
     isDragOver,
     blocks,
+    setBlocks,
     canvasRef,
     container: { width, height },
     handleCanvasDragOver,
@@ -37,6 +41,8 @@ function HomeCenterPanel() {
     updateBlockPositions,
     commitMoveCommand,
   })
+
+  const { importModalOpen, openImportModal, closeImportModal, applyImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -125,41 +131,53 @@ function HomeCenterPanel() {
   )
 
   return (
-    <Layout>
-      <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between">
-        <Space>
-          <Tooltip title="撤销 (Ctrl+Z)">
-            <Button disabled={!canUndo} onClick={undo}>
-              <UndoOutlined />
-              撤销
+    <>
+      <Layout>
+        <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between">
+          <Space>
+            <Tooltip title="撤销 (Ctrl+Z)">
+              <Button disabled={!canUndo} onClick={undo}>
+                <UndoOutlined />
+                撤销
+              </Button>
+            </Tooltip>
+            <Tooltip title="重做 (Ctrl+Y)">
+              <Button disabled={!canRedo} onClick={redo}>
+                <RedoOutlined />
+                重做
+              </Button>
+            </Tooltip>
+            <Button onClick={openImportModal}>
+              <ImportOutlined />
+              导入
             </Button>
-          </Tooltip>
-          <Tooltip title="重做 (Ctrl+Y)">
-            <Button disabled={!canRedo} onClick={redo}>
-              <RedoOutlined />
-              重做
+            <Button onClick={openExportModal}>
+              <ExportOutlined />
+              导出
             </Button>
-          </Tooltip>
-        </Space>
-      </Header>
+          </Space>
+        </Header>
 
-      <Content className="p-4 overflow-auto">
-        <div
-          ref={canvasRef}
-          onDragOver={handleCanvasDragOver}
-          onDragLeave={handleCanvasDragLeave}
-          onDrop={handleCanvasDrop}
-          onClick={clearSelection}
-          className={`mx-auto rounded-xl border border-dashed bg-white transition-colors ${
-            isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'
-          }`}
-          style={{ width, height, position: 'relative' }}
-        >
-          {blocks.map(renderBlock)}
-          {renderGuideLines()}
-        </div>
-      </Content>
-    </Layout>
+        <Content className="p-4 overflow-auto">
+          <div
+            ref={canvasRef}
+            onDragOver={handleCanvasDragOver}
+            onDragLeave={handleCanvasDragLeave}
+            onDrop={handleCanvasDrop}
+            onClick={clearSelection}
+            className={`mx-auto rounded-xl border border-dashed bg-white transition-colors ${
+              isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'
+            }`}
+            style={{ width, height, position: 'relative' }}
+          >
+            {blocks.map(renderBlock)}
+            {renderGuideLines()}
+          </div>
+        </Content>
+      </Layout>
+      <ImportModal open={importModalOpen} onClose={closeImportModal} onApply={applyImport} />
+      <ExportModal open={exportModalOpen} onClose={closeExportModal} getJson={getExportJson} onDownload={downloadAsFile} onCopy={copyToClipboard} />
+    </>
   )
 }
 

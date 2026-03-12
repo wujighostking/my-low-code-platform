@@ -114,6 +114,7 @@ export function useCanvasDrop() {
   return {
     isDragOver,
     blocks,
+    setBlocks,
     canvasRef,
     container: { width, height },
     handleCanvasDragOver,
