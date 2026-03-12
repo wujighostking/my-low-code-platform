@@ -9,8 +9,9 @@ node_modules
 # System
 .DS_Store
 
-# Bundle
+# Build
 dist
+*.tsbuildinfo
 coverage
 packages/element-plus/version.ts
 
