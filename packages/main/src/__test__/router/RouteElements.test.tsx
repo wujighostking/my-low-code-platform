@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { act, render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
-import { toRouteElement } from './RouteElements'
+import { toRouteElement } from '../../router/RouteElements'
 
 describe('toRouteElement', () => {
   it('renders lazy component with fallback first', async () => {

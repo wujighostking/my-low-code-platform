@@ -58,7 +58,7 @@ export interface GuideLines {
   horizontal: number | null
 }
 
-function getAxisAnchors(start: number, size: number): AxisAnchor[] {
+export function getAxisAnchors(start: number, size: number): AxisAnchor[] {
   return [
     { type: 'start', value: start },
     { type: 'center', value: start + size / 2 },
@@ -66,7 +66,7 @@ function getAxisAnchors(start: number, size: number): AxisAnchor[] {
   ]
 }
 
-function getAlignmentPriority(source: AxisAnchor, target: AxisAnchor): number {
+export function getAlignmentPriority(source: AxisAnchor, target: AxisAnchor): number {
   if (source.type === 'center' && target.type === 'center')
     return 3
   if (source.type === target.type)
@@ -76,14 +76,14 @@ function getAlignmentPriority(source: AxisAnchor, target: AxisAnchor): number {
   return 0
 }
 
-function getAnchors(rect: BlockRect) {
+export function getAnchors(rect: BlockRect) {
   return {
     vertical: getAxisAnchors(rect.left, rect.width),
     horizontal: getAxisAnchors(rect.top, rect.height),
   }
 }
 
-function toCanvasRect(element: HTMLElement, canvasRect: DOMRect): BlockRect {
+export function toCanvasRect(element: HTMLElement, canvasRect: DOMRect): BlockRect {
   const rect = element.getBoundingClientRect()
   return {
     top: rect.top - canvasRect.top,
