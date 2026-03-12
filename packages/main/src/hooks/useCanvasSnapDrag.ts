@@ -50,7 +50,7 @@ interface UseCanvasSnapDragOptions {
   canvasRef: RefObject<HTMLDivElement | null>
   updateBlockPositions: (updates: BlockPositionUpdate[]) => void
   getBlockElement: (index: number) => HTMLDivElement | undefined
-  onDragEnd: () => void
+  onDragEnd: (startPositions: { index: number, top: number, left: number }[]) => void
 }
 
 export interface GuideLines {
@@ -181,9 +181,10 @@ export function useCanvasSnapDrag(options: UseCanvasSnapDragOptions) {
       if (!draggingRef.current)
         return
 
+      const startPositions = draggingRef.current.startPositions.map(({ index, top, left }) => ({ index, top, left }))
       draggingRef.current = null
       setGuideLines({ vertical: null, horizontal: null })
-      onDragEnd()
+      onDragEnd(startPositions)
     }
 
     window.addEventListener('mousemove', handleMouseMove)

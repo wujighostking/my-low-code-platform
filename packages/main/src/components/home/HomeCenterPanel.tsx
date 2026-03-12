@@ -1,4 +1,6 @@
-import { Layout } from 'antd'
+import { RedoOutlined, UndoOutlined } from '@ant-design/icons'
+import { Button, Layout, Space, Tooltip } from 'antd'
+import { useEffect } from 'react'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
 import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
 import { registerConfig } from '@/utils/editorConfig'
@@ -15,6 +17,11 @@ function HomeCenterPanel() {
     handleCanvasDragLeave,
     handleCanvasDrop,
     updateBlockPositions,
+    commitMoveCommand,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useCanvasDrop()
 
   const {
@@ -28,7 +35,23 @@ function HomeCenterPanel() {
     blocks,
     canvasRef,
     updateBlockPositions,
+    commitMoveCommand,
   })
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.ctrlKey && event.key === 'z') {
+        event.preventDefault()
+        undo()
+      }
+      if (event.ctrlKey && event.key === 'y') {
+        event.preventDefault()
+        redo()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [undo, redo])
 
   const renderBlock = (block: (typeof blocks)[number], index: number) => {
     const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
@@ -102,7 +125,22 @@ function HomeCenterPanel() {
 
   return (
     <Layout>
-      <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between" />
+      <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between">
+        <Space>
+          <Tooltip title="撤销 (Ctrl+Z)">
+            <Button disabled={!canUndo} onClick={undo}>
+              <UndoOutlined />
+              撤销
+            </Button>
+          </Tooltip>
+          <Tooltip title="重做 (Ctrl+Y)">
+            <Button disabled={!canRedo} onClick={redo}>
+              <RedoOutlined />
+              重做
+            </Button>
+          </Tooltip>
+        </Space>
+      </Header>
 
       <Content className="p-4 overflow-auto">
         <div

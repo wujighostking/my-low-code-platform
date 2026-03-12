@@ -14,10 +14,11 @@ interface UseCanvasSelectionDragOptions {
   blocks: Block[]
   canvasRef: RefObject<HTMLDivElement | null>
   updateBlockPositions: (updates: BlockPositionUpdate[]) => void
+  commitMoveCommand: (updates: { index: number, fromTop: number, fromLeft: number, toTop: number, toLeft: number }[]) => void
 }
 
 export function useCanvasSelectionDrag(options: UseCanvasSelectionDragOptions) {
-  const { blocks, canvasRef, updateBlockPositions } = options
+  const { blocks, canvasRef, updateBlockPositions, commitMoveCommand } = options
   const {
     selectedBlockIndexes,
     draggingBlockIndexes,
@@ -30,12 +31,23 @@ export function useCanvasSelectionDrag(options: UseCanvasSelectionDragOptions) {
     stopDraggingSelection,
   } = useCanvasSelection()
 
+  const handleDragEnd = useCallback((startPositions: { index: number, top: number, left: number }[]) => {
+    stopDraggingSelection()
+    commitMoveCommand(startPositions.map(({ index, top, left }) => ({
+      index,
+      fromTop: top,
+      fromLeft: left,
+      toTop: blocks[index]?.top ?? top,
+      toLeft: blocks[index]?.left ?? left,
+    })))
+  }, [blocks, commitMoveCommand, stopDraggingSelection])
+
   const { guideLines, startDrag } = useCanvasSnapDrag({
     blocks,
     canvasRef,
     updateBlockPositions,
     getBlockElement,
-    onDragEnd: stopDraggingSelection,
+    onDragEnd: handleDragEnd,
   })
 
   const handleBlockMouseDown = useCallback((event: ReactMouseEvent<HTMLDivElement>, index: number) => {

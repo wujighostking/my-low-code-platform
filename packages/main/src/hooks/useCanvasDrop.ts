@@ -1,6 +1,8 @@
 import type { DragEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import editorData from '@/../public/data/data.json'
+import { AddBlockCommand, MoveBlocksCommand } from '@/commands'
+import { useCommandHistory } from '@/hooks/useCommandHistory'
 import { registerConfig } from '@/utils/editorConfig'
 
 export interface Block {
@@ -23,6 +25,8 @@ export function useCanvasDrop() {
 
   const { width, height } = editorData.container
 
+  const { executeCommand, undo, redo, canUndo, canRedo } = useCommandHistory({ setBlocks })
+
   /** 拖拽悬停：阻止默认行为以允许放置，设置视觉反馈 */
   function handleCanvasDragOver(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
@@ -35,7 +39,7 @@ export function useCanvasDrop() {
     setIsDragOver(false)
   }
 
-  /** 放置：解析物料 key，计算相对画布的位置，添加到 blocks */
+  /** 放置：解析物料 key，计算相对画布的位置，通过命令添加到 blocks */
   function handleCanvasDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
     setIsDragOver(false)
@@ -46,12 +50,12 @@ export function useCanvasDrop() {
 
     const rect = canvasRef.current!.getBoundingClientRect()
 
-    setBlocks(prev => [...prev, {
+    executeCommand(new AddBlockCommand({
       top: event.clientY - rect.top,
       left: event.clientX - rect.left,
       zIndex: 1,
       key,
-    }])
+    }))
   }
 
   const updateBlockPositions = useCallback((updates: BlockPositionUpdate[]) => {
@@ -82,6 +86,14 @@ export function useCanvasDrop() {
     updateBlockPositions([{ index, top, left }])
   }, [updateBlockPositions])
 
+  /** 拖拽结束时提交移动命令到历史栈 */
+  const commitMoveCommand = useCallback((updates: { index: number, fromTop: number, fromLeft: number, toTop: number, toLeft: number }[]) => {
+    const meaningful = updates.filter(u => u.fromTop !== u.toTop || u.fromLeft !== u.toLeft)
+    if (meaningful.length === 0)
+      return
+    executeCommand(new MoveBlocksCommand(meaningful))
+  }, [executeCommand])
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas)
@@ -109,5 +121,10 @@ export function useCanvasDrop() {
     handleCanvasDrop,
     updateBlockPositions,
     updateBlockPosition,
+    commitMoveCommand,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   }
 }
