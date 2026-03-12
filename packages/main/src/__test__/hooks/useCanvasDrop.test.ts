@@ -142,4 +142,60 @@ describe('useCanvasDrop', () => {
       expect(result.current.blocks[1].left).toBe(222)
     })
   })
+
+  describe('undo / redo', () => {
+    it('initializes with canUndo and canRedo as false', () => {
+      const { result } = renderHook(() => useCanvasDrop())
+
+      expect(result.current.canUndo).toBe(false)
+      expect(result.current.canRedo).toBe(false)
+    })
+  })
+
+  describe('commitMoveCommand', () => {
+    it('records move and allows undo', () => {
+      const { result } = renderHook(() => useCanvasDrop())
+      const originalTop = result.current.blocks[0].top
+      const originalLeft = result.current.blocks[0].left
+
+      act(() => {
+        result.current.updateBlockPositions([{ index: 0, top: 500, left: 600 }])
+      })
+
+      act(() => {
+        result.current.commitMoveCommand([{
+          index: 0,
+          fromTop: originalTop,
+          fromLeft: originalLeft,
+          toTop: 500,
+          toLeft: 600,
+        }])
+      })
+
+      expect(result.current.canUndo).toBe(true)
+
+      act(() => result.current.undo())
+
+      expect(result.current.blocks[0].top).toBe(originalTop)
+      expect(result.current.blocks[0].left).toBe(originalLeft)
+    })
+
+    it('ignores commit when positions are unchanged', () => {
+      const { result } = renderHook(() => useCanvasDrop())
+      const top = result.current.blocks[0].top
+      const left = result.current.blocks[0].left
+
+      act(() => {
+        result.current.commitMoveCommand([{
+          index: 0,
+          fromTop: top,
+          fromLeft: left,
+          toTop: top,
+          toLeft: left,
+        }])
+      })
+
+      expect(result.current.canUndo).toBe(false)
+    })
+  })
 })
