@@ -1,7 +1,7 @@
 import type { UploadProps } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { Input, Modal, Segmented, Upload } from 'antd'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 const { TextArea } = Input
 const { Dragger } = Upload
@@ -19,25 +19,25 @@ function ImportModal({ open, onClose, onApply }: ImportModalProps) {
   const [textValue, setTextValue] = useState('')
   const [fileContent, setFileContent] = useState('')
 
-  const reset = useCallback(() => {
+  function reset() {
     setTextValue('')
     setFileContent('')
     setMode('文件')
-  }, [])
+  }
 
-  const handleClose = useCallback(() => {
+  function handleClose() {
     reset()
     onClose()
-  }, [onClose, reset])
+  }
 
-  const handleOk = useCallback(() => {
+  function handleOk() {
     const content = mode === '文件' ? fileContent : textValue
     if (!content.trim())
       return
     const success = onApply(content)
     if (success)
       handleClose()
-  }, [mode, fileContent, textValue, onApply, handleClose])
+  }
 
   const uploadProps: UploadProps = {
     accept: '.json',

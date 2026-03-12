@@ -5,21 +5,21 @@ export function useCanvasSelection() {
   const [draggingBlockIndexes, setDraggingBlockIndexes] = useState<number[]>([])
   const blockElementsRef = useRef<Map<number, HTMLDivElement>>(new Map())
 
-  const setBlockElement = useCallback((index: number, element: HTMLDivElement | null) => {
+  function setBlockElement(index: number, element: HTMLDivElement | null) {
     if (!element) {
       blockElementsRef.current.delete(index)
       return
     }
     blockElementsRef.current.set(index, element)
-  }, [])
+  }
 
-  const getBlockElement = useCallback((index: number) => {
+  function getBlockElement(index: number) {
     return blockElementsRef.current.get(index)
-  }, [])
+  }
 
-  const clearSelection = useCallback(() => {
+  function clearSelection() {
     setSelectedBlockIndexes([])
-  }, [])
+  }
 
   const getNextSelectedBlockIndexes = useCallback((index: number, shiftKey: boolean) => {
     const isCurrentSelected = selectedBlockIndexes.includes(index)
@@ -28,17 +28,17 @@ export function useCanvasSelection() {
       : (isCurrentSelected ? selectedBlockIndexes : [index])
   }, [selectedBlockIndexes])
 
-  const applySelection = useCallback((indexes: number[]) => {
+  function applySelection(indexes: number[]) {
     setSelectedBlockIndexes(indexes)
-  }, [])
+  }
 
-  const startDraggingSelection = useCallback((indexes: number[]) => {
+  function startDraggingSelection(indexes: number[]) {
     setDraggingBlockIndexes(indexes)
-  }, [])
+  }
 
-  const stopDraggingSelection = useCallback(() => {
+  function stopDraggingSelection() {
     setDraggingBlockIndexes([])
-  }, [])
+  }
 
   return {
     selectedBlockIndexes,

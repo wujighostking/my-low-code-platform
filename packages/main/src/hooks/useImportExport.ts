@@ -46,15 +46,15 @@ export function validateEditorData(data: unknown): data is EditorData {
 export function useImportExport({ blocks, container, setBlocks }: UseImportExportOptions) {
   const [importModalOpen, setImportModalOpen] = useState(false)
 
-  const openImportModal = useCallback(() => {
+  function openImportModal() {
     setImportModalOpen(true)
-  }, [])
+  }
 
-  const closeImportModal = useCallback(() => {
+  function closeImportModal() {
     setImportModalOpen(false)
-  }, [])
+  }
 
-  const applyImport = useCallback((jsonStr: string) => {
+  function applyImport(jsonStr: string) {
     try {
       const data = JSON.parse(jsonStr)
       if (!validateEditorData(data)) {
@@ -69,17 +69,17 @@ export function useImportExport({ blocks, container, setBlocks }: UseImportExpor
       message.error('JSON 解析失败，请检查格式')
       return false
     }
-  }, [setBlocks])
+  }
 
   const [exportModalOpen, setExportModalOpen] = useState(false)
 
-  const openExportModal = useCallback(() => {
+  function openExportModal() {
     setExportModalOpen(true)
-  }, [])
+  }
 
-  const closeExportModal = useCallback(() => {
+  function closeExportModal() {
     setExportModalOpen(false)
-  }, [])
+  }
 
   const getExportJson = useCallback(() => {
     const data: EditorData = { container, blocks }
