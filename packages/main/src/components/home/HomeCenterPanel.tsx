@@ -40,11 +40,12 @@ function HomeCenterPanel() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.ctrlKey && event.key === 'z') {
+      const key = event.key.toLowerCase()
+      if (event.ctrlKey && key === 'z') {
         event.preventDefault()
         undo()
       }
-      if (event.ctrlKey && event.key === 'y') {
+      if (event.ctrlKey && key === 'y') {
         event.preventDefault()
         redo()
       }
