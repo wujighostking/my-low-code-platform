@@ -1,6 +1,7 @@
-import { ExportOutlined, ImportOutlined, RedoOutlined, UndoOutlined } from '@ant-design/icons'
+import { ExportOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Tooltip } from 'antd'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
+import { ChangeZIndexCommand } from '@/commands'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
 import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
 import { useImportExport } from '@/hooks/useImportExport'
@@ -22,6 +23,7 @@ function HomeCenterPanel() {
     handleCanvasDrop,
     updateBlockPositions,
     commitMoveCommand,
+    executeCommand,
     undo,
     redo,
     canUndo,
@@ -43,6 +45,30 @@ function HomeCenterPanel() {
   })
 
   const { importModalOpen, openImportModal, closeImportModal, applyImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
+
+  const bringToFront = useCallback(() => {
+    if (selectedBlockIndexes.length === 0)
+      return
+    const maxZIndex = Math.max(...blocks.map(b => b.zIndex))
+    const updates = selectedBlockIndexes.map(index => ({
+      index,
+      fromZIndex: blocks[index].zIndex,
+      toZIndex: maxZIndex + 1,
+    }))
+    executeCommand(new ChangeZIndexCommand(updates))
+  }, [blocks, selectedBlockIndexes, executeCommand])
+
+  const sendToBack = useCallback(() => {
+    if (selectedBlockIndexes.length === 0)
+      return
+    const minZIndex = Math.min(...blocks.map(b => b.zIndex))
+    const updates = selectedBlockIndexes.map(index => ({
+      index,
+      fromZIndex: blocks[index].zIndex,
+      toZIndex: minZIndex - 1,
+    }))
+    executeCommand(new ChangeZIndexCommand(updates))
+  }, [blocks, selectedBlockIndexes, executeCommand])
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -145,6 +171,18 @@ function HomeCenterPanel() {
               <Button disabled={!canRedo} onClick={redo}>
                 <RedoOutlined />
                 重做
+              </Button>
+            </Tooltip>
+            <Tooltip title="置顶">
+              <Button disabled={selectedBlockIndexes.length === 0} onClick={bringToFront}>
+                <VerticalAlignTopOutlined />
+                置顶
+              </Button>
+            </Tooltip>
+            <Tooltip title="置底">
+              <Button disabled={selectedBlockIndexes.length === 0} onClick={sendToBack}>
+                <VerticalAlignBottomOutlined />
+                置底
               </Button>
             </Tooltip>
             <Button onClick={openImportModal}>

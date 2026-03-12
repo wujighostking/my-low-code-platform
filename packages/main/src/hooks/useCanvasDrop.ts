@@ -123,6 +123,7 @@ export function useCanvasDrop() {
     updateBlockPositions,
     updateBlockPosition,
     commitMoveCommand,
+    executeCommand,
     undo,
     redo,
     canUndo,

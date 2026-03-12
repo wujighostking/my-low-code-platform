@@ -52,3 +52,33 @@ export class MoveBlocksCommand implements Command {
     return next
   }
 }
+
+interface ZIndexUpdate {
+  index: number
+  fromZIndex: number
+  toZIndex: number
+}
+
+export class ChangeZIndexCommand implements Command {
+  private updates: ZIndexUpdate[]
+
+  constructor(updates: ZIndexUpdate[]) {
+    this.updates = updates
+  }
+
+  execute(blocks: Block[]): Block[] {
+    const next = [...blocks]
+    this.updates.forEach(({ index, toZIndex }) => {
+      next[index] = { ...next[index], zIndex: toZIndex }
+    })
+    return next
+  }
+
+  undo(blocks: Block[]): Block[] {
+    const next = [...blocks]
+    this.updates.forEach(({ index, fromZIndex }) => {
+      next[index] = { ...next[index], zIndex: fromZIndex }
+    })
+    return next
+  }
+}
