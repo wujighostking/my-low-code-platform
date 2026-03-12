@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm turbo:*)"
+      "Bash(pnpm turbo:*)",
+      "Bash(git *)"
     ]
   }
 }
