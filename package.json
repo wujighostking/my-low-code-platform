@@ -18,7 +18,9 @@
     "preinstall": "npx only-allow pnpm",
     "build": "turbo run build",
     "preview": "turbo run preview --filter=main",
-    "dev": "turbo run dev --filter=main"
+    "dev": "turbo run dev --filter=main",
+    "dev:nest": "turbo run dev --filter=nest",
+    "dev:all": "turbo run dev"
   },
   "dependencies": {
     "antd": "^6.3.1",

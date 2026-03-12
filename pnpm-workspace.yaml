@@ -6,3 +6,5 @@ packages:
 onlyBuiltDependencies:
   - esbuild
   - simple-git-hooks
+  - '@nestjs/core'
+  - '@swc/core'
