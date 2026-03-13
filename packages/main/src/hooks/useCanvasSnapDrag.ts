@@ -198,7 +198,7 @@ export function useCanvasSnapDrag(options: UseCanvasSnapDragOptions) {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [onDragEnd, updateBlockPositions])
+  }, [onDragEnd, updateBlockPositions, canvasRef])
 
   const startDrag = useCallback((
     event: ReactMouseEvent<HTMLDivElement>,

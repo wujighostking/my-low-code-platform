@@ -1,4 +1,3 @@
-import type { Command } from '@/commands'
 import type { Block } from '@/hooks/useCanvasDrop'
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
