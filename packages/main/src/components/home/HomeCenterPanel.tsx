@@ -55,20 +55,23 @@ function HomeCenterPanel({ isPreviewing, setIsPreviewing }: HomeCenterPanelProps
   const { importModalOpen, openImportModal, closeImportModal, applyImport, replaceImportModalOpen, openReplaceImportModal, closeReplaceImportModal, applyReplaceImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
 
   const [isEditing, setIsEditing] = useState(true)
+  const [editingBeforePreview, setEditingBeforePreview] = useState(true)
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
   const [viewDataBlock, setViewDataBlock] = useState<(typeof blocks)[number] | null>(null)
   const [replaceTargetBlock, setReplaceTargetBlock] = useState<(typeof blocks)[number] | null>(null)
   const [replaceTargetIndexes, setReplaceTargetIndexes] = useState<number[]>([])
 
   const openPreview = useCallback(() => {
+    setEditingBeforePreview(isEditing)
     clearSelection()
     setIsEditing(false)
     setIsPreviewing(true)
-  }, [clearSelection, setIsPreviewing])
+  }, [isEditing, clearSelection, setIsPreviewing])
 
   const closePreview = useCallback(() => {
     setIsPreviewing(false)
-  }, [setIsPreviewing])
+    setIsEditing(editingBeforePreview)
+  }, [editingBeforePreview, setIsPreviewing])
 
   const bringToFront = useCallback(() => {
     if (selectedBlockIndexes.length === 0)
