@@ -2,7 +2,7 @@ import { act, render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
-import Preview from '../../views/Preview'
+import Preview from '../../components/home/Preview'
 
 const validData = {
   container: { width: 800, height: 800 },
