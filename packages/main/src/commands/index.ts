@@ -53,6 +53,33 @@ export class MoveBlocksCommand implements Command {
   }
 }
 
+interface DeleteEntry {
+  index: number
+  block: Block
+}
+
+export class DeleteBlocksCommand implements Command {
+  private entries: DeleteEntry[]
+
+  constructor(entries: DeleteEntry[]) {
+    this.entries = entries.sort((a, b) => b.index - a.index)
+  }
+
+  execute(blocks: Block[]): Block[] {
+    const indexSet = new Set(this.entries.map(e => e.index))
+    return blocks.filter((_, i) => !indexSet.has(i))
+  }
+
+  undo(blocks: Block[]): Block[] {
+    const next = [...blocks]
+    const sorted = this.entries.toSorted((a, b) => a.index - b.index)
+    sorted.forEach(({ index, block }) => {
+      next.splice(index, 0, block)
+    })
+    return next
+  }
+}
+
 interface ZIndexUpdate {
   index: number
   fromZIndex: number

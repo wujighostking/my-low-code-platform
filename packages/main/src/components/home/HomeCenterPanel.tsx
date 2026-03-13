@@ -1,7 +1,7 @@
-import { ExportOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
+import { DeleteOutlined, ExportOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Tooltip } from 'antd'
 import { useCallback, useEffect } from 'react'
-import { ChangeZIndexCommand } from '@/commands'
+import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
 import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
 import { useImportExport } from '@/hooks/useImportExport'
@@ -58,6 +58,17 @@ function HomeCenterPanel() {
     executeCommand(new ChangeZIndexCommand(updates))
   }, [blocks, selectedBlockIndexes, executeCommand])
 
+  const deleteSelected = useCallback(() => {
+    if (selectedBlockIndexes.length === 0)
+      return
+    const entries = selectedBlockIndexes.map(index => ({
+      index,
+      block: blocks[index],
+    }))
+    executeCommand(new DeleteBlocksCommand(entries))
+    clearSelection()
+  }, [blocks, selectedBlockIndexes, executeCommand, clearSelection])
+
   const sendToBack = useCallback(() => {
     if (selectedBlockIndexes.length === 0)
       return
@@ -81,10 +92,14 @@ function HomeCenterPanel() {
         event.preventDefault()
         redo()
       }
+      if (key === 'delete' || key === 'backspace') {
+        event.preventDefault()
+        deleteSelected()
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [undo, redo])
+  }, [undo, redo, deleteSelected])
 
   const renderBlock = (block: (typeof blocks)[number], index: number) => {
     const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
@@ -183,6 +198,12 @@ function HomeCenterPanel() {
               <Button disabled={selectedBlockIndexes.length === 0} onClick={sendToBack}>
                 <VerticalAlignBottomOutlined />
                 置底
+              </Button>
+            </Tooltip>
+            <Tooltip title="删除 (Delete)">
+              <Button disabled={selectedBlockIndexes.length === 0} onClick={deleteSelected}>
+                <DeleteOutlined />
+                删除
               </Button>
             </Tooltip>
             <Button onClick={openImportModal}>
