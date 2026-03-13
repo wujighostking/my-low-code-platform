@@ -168,12 +168,16 @@ export function useCanvasSnapDrag(options: UseCanvasSnapDragOptions) {
         return nextGuideLines
       })
 
+      const canvas = canvasRef.current
+      const canvasWidth = canvas ? canvas.clientWidth : Infinity
+      const canvasHeight = canvas ? canvas.clientHeight : Infinity
+
       updateBlockPositions(
-        nextPositions.map(({ index, top, left, height, width }) => ({
-          index,
-          top: top + snappedOffsetY + height / 2,
-          left: left + snappedOffsetX + width / 2,
-        })),
+        nextPositions.map(({ index, top, left, height, width }) => {
+          const clampedLeft = Math.max(width / 2, Math.min(left + snappedOffsetX + width / 2, canvasWidth - width / 2))
+          const clampedTop = Math.max(height / 2, Math.min(top + snappedOffsetY + height / 2, canvasHeight - height / 2))
+          return { index, top: clampedTop, left: clampedLeft }
+        }),
       )
     }
 
