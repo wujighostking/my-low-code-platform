@@ -1,13 +1,14 @@
 import type { MenuProps } from 'antd'
 import type { Dispatch, SetStateAction } from 'react'
-import { CodeOutlined, DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, FormOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
-import { Button, Dropdown, Layout, Modal, Space, Tooltip } from 'antd'
+import { CodeOutlined, DeleteOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
+import { Dropdown, Layout, Modal } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
 import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
 import { useImportExport } from '@/hooks/useImportExport'
 import { registerConfig } from '@/utils/editorConfig'
+import EditorToolbar from './EditorToolbar'
 import ExportModal from './ExportModal'
 import ImportModal from './ImportModal'
 
@@ -300,49 +301,16 @@ function HomeCenterPanel({ isPreviewing, setIsPreviewing }: HomeCenterPanelProps
     <>
       <Layout>
         <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between">
-          <Space>
-            {!isPreviewing && (
-              <>
-                {toolbarActions.map(({ key, label, icon, shortcut, disabled, onClick }) => (
-                  <Tooltip key={key} title={shortcut ? `${label} (${shortcut})` : label}>
-                    <Button disabled={!isEditing || disabled} onClick={onClick}>
-                      {icon}
-                      {label}
-                    </Button>
-                  </Tooltip>
-                ))}
-                <Button disabled={!isEditing} onClick={openImportModal}>
-                  <ImportOutlined />
-                  导入
-                </Button>
-                <Button onClick={openExportModal}>
-                  <ExportOutlined />
-                  导出
-                </Button>
-              </>
-            )}
-            {isPreviewing
-              ? (
-                  <Button onClick={closePreview}>
-                    <EditOutlined />
-                    返回编辑
-                  </Button>
-                )
-              : (
-                  <>
-                    <Button type="primary" onClick={openPreview}>
-                      <EyeOutlined />
-                      预览
-                    </Button>
-                    <Tooltip title={isEditing ? '关闭编辑' : '启用编辑'}>
-                      <Button type={isEditing ? 'primary' : 'default'} onClick={toggleEditing}>
-                        {isEditing ? <FormOutlined /> : <EditOutlined />}
-                        {isEditing ? '关闭编辑' : '启用编辑'}
-                      </Button>
-                    </Tooltip>
-                  </>
-                )}
-          </Space>
+          <EditorToolbar
+            toolbarActions={toolbarActions}
+            isEditing={isEditing}
+            isPreviewing={isPreviewing}
+            onImport={openImportModal}
+            onExport={openExportModal}
+            onOpenPreview={openPreview}
+            onClosePreview={closePreview}
+            onToggleEditing={toggleEditing}
+          />
         </Header>
 
         <Content className="p-4 overflow-auto">
