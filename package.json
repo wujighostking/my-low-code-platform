@@ -60,8 +60,8 @@
     "commit-msg": "pnpm commitlint"
   },
   "lint-staged": {
-    "*": [
-      "eslint --fix"
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "npx eslint --fix"
     ]
   }
 }

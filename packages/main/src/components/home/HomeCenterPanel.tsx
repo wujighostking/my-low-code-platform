@@ -1,6 +1,7 @@
-import { DeleteOutlined, ExportOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
+import { DeleteOutlined, ExportOutlined, EyeOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Tooltip } from 'antd'
 import { useCallback, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
 import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
@@ -45,6 +46,13 @@ function HomeCenterPanel() {
   })
 
   const { importModalOpen, openImportModal, closeImportModal, applyImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
+
+  const navigate = useNavigate()
+
+  const openPreview = useCallback(() => {
+    sessionStorage.setItem('preview-data', JSON.stringify({ container: { width, height }, blocks }))
+    navigate('/preview')
+  }, [blocks, width, height, navigate])
 
   const bringToFront = useCallback(() => {
     if (selectedBlockIndexes.length === 0)
@@ -214,6 +222,10 @@ function HomeCenterPanel() {
             <Button onClick={openExportModal}>
               <ExportOutlined />
               导出
+            </Button>
+            <Button type="primary" onClick={openPreview}>
+              <EyeOutlined />
+              预览
             </Button>
           </Space>
         </Header>
