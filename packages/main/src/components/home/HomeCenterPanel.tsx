@@ -1,6 +1,7 @@
+import type { MenuProps } from 'antd'
 import { DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, FormOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
-import { Button, Layout, Space, Tooltip } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
+import { Button, Dropdown, Layout, Space, Tooltip } from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
@@ -37,6 +38,7 @@ function HomeCenterPanel() {
     guideLines,
     setBlockElement,
     clearSelection,
+    applySelection,
     handleBlockMouseDown,
   } = useCanvasSelectionDrag({
     blocks,
@@ -49,6 +51,7 @@ function HomeCenterPanel() {
 
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(true)
+  const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
 
   const openPreview = useCallback(() => {
     sessionStorage.setItem('preview-data', JSON.stringify({ container: { width, height }, blocks }))
@@ -89,6 +92,60 @@ function HomeCenterPanel() {
     }))
     executeCommand(new ChangeZIndexCommand(updates))
   }, [blocks, selectedBlockIndexes, executeCommand])
+
+  const handleContextMenu = useCallback((event: React.MouseEvent, blockIndex?: number) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (!isEditing)
+      return
+    if (blockIndex !== undefined && !selectedBlockIndexes.includes(blockIndex))
+      applySelection([blockIndex])
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (!rect)
+      return
+    setContextMenu({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    })
+  }, [isEditing, canvasRef, selectedBlockIndexes, applySelection])
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(null)
+  }, [])
+
+  const hasSelection = selectedBlockIndexes.length > 0
+
+  const toolbarActions = useMemo(() => [
+    { key: 'undo', label: '撤销', icon: <UndoOutlined />, shortcut: 'Ctrl+Z', disabled: !canUndo, onClick: undo },
+    { key: 'redo', label: '重做', icon: <RedoOutlined />, shortcut: 'Ctrl+Y', disabled: !canRedo, onClick: redo },
+    { key: 'bringToFront', label: '置顶', icon: <VerticalAlignTopOutlined />, disabled: !hasSelection, onClick: bringToFront },
+    { key: 'sendToBack', label: '置底', icon: <VerticalAlignBottomOutlined />, disabled: !hasSelection, onClick: sendToBack },
+    { key: 'delete', label: '删除', icon: <DeleteOutlined />, shortcut: 'Delete', disabled: !hasSelection, danger: true, onClick: deleteSelected },
+  ], [canUndo, canRedo, hasSelection, undo, redo, bringToFront, sendToBack, deleteSelected])
+
+  const contextMenuItems: MenuProps['items'] = useMemo(() => {
+    const actionItems = toolbarActions.map(({ key, label, icon, shortcut, disabled, danger, onClick }) => ({
+      key,
+      label,
+      icon,
+      extra: shortcut,
+      disabled,
+      danger,
+      onClick: () => {
+        onClick()
+        closeContextMenu()
+      },
+    }))
+    return [
+      actionItems[0],
+      actionItems[1],
+      { type: 'divider' as const },
+      actionItems[2],
+      actionItems[3],
+      { type: 'divider' as const },
+      actionItems[4],
+    ]
+  }, [toolbarActions, closeContextMenu])
 
   const toggleEditing = useCallback(() => {
     setIsEditing((prev) => {
@@ -133,6 +190,7 @@ function HomeCenterPanel() {
         key={`${block.key}-${index}`}
         ref={element => setBlockElement(index, element)}
         onMouseDown={isEditing ? event => handleBlockMouseDown(event, index) : undefined}
+        onContextMenu={isEditing ? event => handleContextMenu(event, index) : undefined}
         onClick={isEditing ? event => event.stopPropagation() : undefined}
         className="rounded-md select-none"
         style={{
@@ -196,36 +254,14 @@ function HomeCenterPanel() {
       <Layout>
         <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between">
           <Space>
-            <Tooltip title="撤销 (Ctrl+Z)">
-              <Button disabled={!isEditing || !canUndo} onClick={undo}>
-                <UndoOutlined />
-                撤销
-              </Button>
-            </Tooltip>
-            <Tooltip title="重做 (Ctrl+Y)">
-              <Button disabled={!isEditing || !canRedo} onClick={redo}>
-                <RedoOutlined />
-                重做
-              </Button>
-            </Tooltip>
-            <Tooltip title="置顶">
-              <Button disabled={!isEditing || selectedBlockIndexes.length === 0} onClick={bringToFront}>
-                <VerticalAlignTopOutlined />
-                置顶
-              </Button>
-            </Tooltip>
-            <Tooltip title="置底">
-              <Button disabled={!isEditing || selectedBlockIndexes.length === 0} onClick={sendToBack}>
-                <VerticalAlignBottomOutlined />
-                置底
-              </Button>
-            </Tooltip>
-            <Tooltip title="删除 (Delete)">
-              <Button disabled={!isEditing || selectedBlockIndexes.length === 0} onClick={deleteSelected}>
-                <DeleteOutlined />
-                删除
-              </Button>
-            </Tooltip>
+            {toolbarActions.map(({ key, label, icon, shortcut, disabled, onClick }) => (
+              <Tooltip key={key} title={shortcut ? `${label} (${shortcut})` : label}>
+                <Button disabled={!isEditing || disabled} onClick={onClick}>
+                  {icon}
+                  {label}
+                </Button>
+              </Tooltip>
+            ))}
             <Button disabled={!isEditing} onClick={openImportModal}>
               <ImportOutlined />
               导入
@@ -253,7 +289,13 @@ function HomeCenterPanel() {
             onDragOver={isEditing ? handleCanvasDragOver : undefined}
             onDragLeave={isEditing ? handleCanvasDragLeave : undefined}
             onDrop={isEditing ? handleCanvasDrop : undefined}
-            onClick={isEditing ? clearSelection : undefined}
+            onContextMenu={isEditing ? handleContextMenu : undefined}
+            onClick={isEditing
+              ? () => {
+                  clearSelection()
+                  closeContextMenu()
+                }
+              : undefined}
             className={`mx-auto rounded-xl border border-dashed bg-white transition-colors ${
               isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'
             }`}
@@ -261,6 +303,28 @@ function HomeCenterPanel() {
           >
             {blocks.map(renderBlock)}
             {renderGuideLines()}
+            {contextMenu && (
+              <div
+                className="absolute"
+                style={{
+                  left: contextMenu.x,
+                  top: contextMenu.y,
+                  zIndex: 9999,
+                }}
+              >
+                <Dropdown
+                  menu={{ items: contextMenuItems }}
+                  open
+                  onOpenChange={(open) => {
+                    if (!open)
+                      closeContextMenu()
+                  }}
+                  trigger={['contextMenu']}
+                >
+                  <div />
+                </Dropdown>
+              </div>
+            )}
           </div>
         </Content>
       </Layout>
