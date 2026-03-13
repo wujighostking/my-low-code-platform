@@ -11,6 +11,7 @@ function createOptions(overrides = {}) {
     ],
     canvasRef: { current: null } as { current: HTMLDivElement | null },
     updateBlockPositions: vi.fn(),
+    commitMoveCommand: vi.fn(),
     ...overrides,
   }
 }

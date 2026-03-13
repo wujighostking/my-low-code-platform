@@ -169,10 +169,10 @@ export function useCanvasSnapDrag(options: UseCanvasSnapDragOptions) {
       })
 
       updateBlockPositions(
-        nextPositions.map(({ index, top, left }) => ({
+        nextPositions.map(({ index, top, left, height, width }) => ({
           index,
-          top: top + snappedOffsetY,
-          left: left + snappedOffsetX,
+          top: top + snappedOffsetY + height / 2,
+          left: left + snappedOffsetX + width / 2,
         })),
       )
     }
@@ -181,7 +181,7 @@ export function useCanvasSnapDrag(options: UseCanvasSnapDragOptions) {
       if (!draggingRef.current)
         return
 
-      const startPositions = draggingRef.current.startPositions.map(({ index, top, left }) => ({ index, top, left }))
+      const startPositions = draggingRef.current.startPositions.map(({ index, top, left, height, width }) => ({ index, top: top + height / 2, left: left + width / 2 }))
       draggingRef.current = null
       setGuideLines({ vertical: null, horizontal: null })
       onDragEnd(startPositions)

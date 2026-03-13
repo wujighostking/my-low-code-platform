@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import editorData from '@/../public/data/data.json'
 import { AddBlockCommand, MoveBlocksCommand } from '@/commands'
 import { useCommandHistory } from '@/hooks/useCommandHistory'
@@ -93,23 +93,6 @@ export function useCanvasDrop() {
       return
     executeCommand(new MoveBlocksCommand(meaningful))
   }, [executeCommand])
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas)
-      return
-
-    const children = canvas.children
-    blocks.forEach((block, index) => {
-      const el = children[index] as HTMLElement | undefined
-      if (!el || el.dataset.aligned)
-        return
-      const { offsetWidth, offsetHeight } = el
-      el.style.top = `${block.top - offsetHeight / 2}px`
-      el.style.left = `${block.left - offsetWidth / 2}px`
-      el.dataset.aligned = '1'
-    })
-  }, [blocks])
 
   return {
     isDragOver,

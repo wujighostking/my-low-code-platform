@@ -20,14 +20,14 @@ describe('useCanvasSelection', () => {
       expect(result.current.getBlockElement(0)).toBe(element)
     })
 
-    it('removes element when null is passed', () => {
+    it('ignores null to prevent ref cleanup race condition', () => {
       const { result } = renderHook(() => useCanvasSelection())
       const element = document.createElement('div')
 
       act(() => result.current.setBlockElement(0, element as HTMLDivElement))
       act(() => result.current.setBlockElement(0, null))
 
-      expect(result.current.getBlockElement(0)).toBeUndefined()
+      expect(result.current.getBlockElement(0)).toBe(element)
     })
 
     it('returns undefined for unregistered index', () => {

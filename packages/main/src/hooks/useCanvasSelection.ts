@@ -6,11 +6,9 @@ export function useCanvasSelection() {
   const blockElementsRef = useRef<Map<number, HTMLDivElement>>(new Map())
 
   function setBlockElement(index: number, element: HTMLDivElement | null) {
-    if (!element) {
-      blockElementsRef.current.delete(index)
-      return
+    if (element) {
+      blockElementsRef.current.set(index, element)
     }
-    blockElementsRef.current.set(index, element)
   }
 
   function getBlockElement(index: number) {

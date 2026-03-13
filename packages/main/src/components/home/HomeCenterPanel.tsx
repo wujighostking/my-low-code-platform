@@ -121,6 +121,7 @@ function HomeCenterPanel() {
           top: block.top,
           left: block.left,
           zIndex: block.zIndex,
+          transform: 'translate(-50%, -50%)',
           cursor: isDragging ? 'grabbing' : isSelected ? 'grab' : 'pointer',
           boxShadow: isSelected ? '0 0 0 2px #1677ff' : 'none',
         }}
