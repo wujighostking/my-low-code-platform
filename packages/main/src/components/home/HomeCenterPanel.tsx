@@ -1,8 +1,8 @@
 import type { MenuProps } from 'antd'
+import type { Dispatch, SetStateAction } from 'react'
 import { CodeOutlined, DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, FormOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Layout, Modal, Space, Tooltip } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
 import { useCanvasSelectionDrag } from '@/hooks/useCanvasSelectionDrag'
@@ -13,7 +13,12 @@ import ImportModal from './ImportModal'
 
 const { Header, Content } = Layout
 
-function HomeCenterPanel() {
+interface HomeCenterPanelProps {
+  isPreviewing: boolean
+  setIsPreviewing: Dispatch<SetStateAction<boolean>>
+}
+
+function HomeCenterPanel({ isPreviewing, setIsPreviewing }: HomeCenterPanelProps) {
   const {
     isDragOver,
     blocks,
@@ -47,17 +52,23 @@ function HomeCenterPanel() {
     commitMoveCommand,
   })
 
-  const { importModalOpen, openImportModal, closeImportModal, applyImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
+  const { importModalOpen, openImportModal, closeImportModal, applyImport, replaceImportModalOpen, openReplaceImportModal, closeReplaceImportModal, applyReplaceImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
 
-  const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(true)
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
   const [viewDataBlock, setViewDataBlock] = useState<(typeof blocks)[number] | null>(null)
+  const [replaceTargetBlock, setReplaceTargetBlock] = useState<(typeof blocks)[number] | null>(null)
+  const [replaceTargetIndexes, setReplaceTargetIndexes] = useState<number[]>([])
 
   const openPreview = useCallback(() => {
-    sessionStorage.setItem('preview-data', JSON.stringify({ container: { width, height }, blocks }))
-    navigate('/preview')
-  }, [blocks, width, height, navigate])
+    clearSelection()
+    setIsEditing(false)
+    setIsPreviewing(true)
+  }, [clearSelection, setIsPreviewing])
+
+  const closePreview = useCallback(() => {
+    setIsPreviewing(false)
+  }, [setIsPreviewing])
 
   const bringToFront = useCallback(() => {
     if (selectedBlockIndexes.length === 0)
@@ -160,10 +171,22 @@ function HomeCenterPanel() {
           closeContextMenu()
         },
       },
+      {
+        key: 'replaceImport',
+        label: '导入替换',
+        icon: <ImportOutlined />,
+        disabled: !hasSelection,
+        onClick: () => {
+          setReplaceTargetBlock(blocks[selectedBlockIndexes[0]])
+          setReplaceTargetIndexes([...selectedBlockIndexes])
+          openReplaceImportModal()
+          closeContextMenu()
+        },
+      },
       { type: 'divider' as const },
       actionItems[4],
     ]
-  }, [toolbarActions, closeContextMenu, hasSelection, viewSelectedData])
+  }, [toolbarActions, closeContextMenu, hasSelection, viewSelectedData, openReplaceImportModal, blocks, selectedBlockIndexes])
 
   const toggleEditing = useCallback(() => {
     setIsEditing((prev) => {
@@ -176,6 +199,9 @@ function HomeCenterPanel() {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (!isEditing)
+        return
+      const target = event.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
         return
       const key = event.key.toLowerCase()
       if (event.ctrlKey && key === 'z') {
@@ -272,32 +298,47 @@ function HomeCenterPanel() {
       <Layout>
         <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between">
           <Space>
-            {toolbarActions.map(({ key, label, icon, shortcut, disabled, onClick }) => (
-              <Tooltip key={key} title={shortcut ? `${label} (${shortcut})` : label}>
-                <Button disabled={!isEditing || disabled} onClick={onClick}>
-                  {icon}
-                  {label}
+            {!isPreviewing && (
+              <>
+                {toolbarActions.map(({ key, label, icon, shortcut, disabled, onClick }) => (
+                  <Tooltip key={key} title={shortcut ? `${label} (${shortcut})` : label}>
+                    <Button disabled={!isEditing || disabled} onClick={onClick}>
+                      {icon}
+                      {label}
+                    </Button>
+                  </Tooltip>
+                ))}
+                <Button disabled={!isEditing} onClick={openImportModal}>
+                  <ImportOutlined />
+                  导入
                 </Button>
-              </Tooltip>
-            ))}
-            <Button disabled={!isEditing} onClick={openImportModal}>
-              <ImportOutlined />
-              导入
-            </Button>
-            <Button onClick={openExportModal}>
-              <ExportOutlined />
-              导出
-            </Button>
-            <Button type="primary" onClick={openPreview}>
-              <EyeOutlined />
-              预览
-            </Button>
-            <Tooltip title={isEditing ? '关闭编辑' : '启用编辑'}>
-              <Button type={isEditing ? 'primary' : 'default'} onClick={toggleEditing}>
-                {isEditing ? <FormOutlined /> : <EditOutlined />}
-                {isEditing ? '关闭编辑' : '启用编辑'}
-              </Button>
-            </Tooltip>
+                <Button onClick={openExportModal}>
+                  <ExportOutlined />
+                  导出
+                </Button>
+              </>
+            )}
+            {isPreviewing
+              ? (
+                  <Button onClick={closePreview}>
+                    <EditOutlined />
+                    返回编辑
+                  </Button>
+                )
+              : (
+                  <>
+                    <Button type="primary" onClick={openPreview}>
+                      <EyeOutlined />
+                      预览
+                    </Button>
+                    <Tooltip title={isEditing ? '关闭编辑' : '启用编辑'}>
+                      <Button type={isEditing ? 'primary' : 'default'} onClick={toggleEditing}>
+                        {isEditing ? <FormOutlined /> : <EditOutlined />}
+                        {isEditing ? '关闭编辑' : '启用编辑'}
+                      </Button>
+                    </Tooltip>
+                  </>
+                )}
           </Space>
         </Header>
 
@@ -314,8 +355,8 @@ function HomeCenterPanel() {
                   closeContextMenu()
                 }
               : undefined}
-            className={`mx-auto rounded-xl border border-dashed bg-white transition-colors ${
-              isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'
+            className={`mx-auto rounded-xl bg-white transition-colors ${
+              isPreviewing ? 'shadow-lg' : `border border-dashed ${isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'}`
             }`}
             style={{ width, height, position: 'relative' }}
           >
@@ -347,6 +388,18 @@ function HomeCenterPanel() {
         </Content>
       </Layout>
       <ImportModal open={importModalOpen} onClose={closeImportModal} onApply={applyImport} />
+      <ImportModal
+        open={replaceImportModalOpen}
+        onClose={() => {
+          closeReplaceImportModal()
+          setReplaceTargetBlock(null)
+          setReplaceTargetIndexes([])
+        }}
+        onApply={jsonStr => applyReplaceImport(jsonStr, replaceTargetIndexes)}
+        title="导入替换组件"
+        placeholder={'粘贴组件 JSON 数据，例如：\n{\n  "key": "button",\n  "top": 0,\n  "left": 0,\n  "zIndex": 1\n}'}
+        defaultTextValue={replaceTargetBlock ? JSON.stringify(replaceTargetBlock, null, 2) : undefined}
+      />
       <ExportModal open={exportModalOpen} onClose={closeExportModal} getJson={getExportJson} onDownload={downloadAsFile} onCopy={copyToClipboard} />
       <Modal
         title="组件数据"

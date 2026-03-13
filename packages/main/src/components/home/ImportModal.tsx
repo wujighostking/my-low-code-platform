@@ -1,7 +1,7 @@
 import type { UploadProps } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { Input, Modal, Segmented, Upload } from 'antd'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 const { TextArea } = Input
 const { Dragger } = Upload
@@ -12,12 +12,29 @@ interface ImportModalProps {
   open: boolean
   onClose: () => void
   onApply: (jsonStr: string) => boolean
+  title?: string
+  placeholder?: string
+  defaultTextValue?: string
 }
 
-function ImportModal({ open, onClose, onApply }: ImportModalProps) {
+function ImportModal({ open, onClose, onApply, title = '导入配置', placeholder, defaultTextValue }: ImportModalProps) {
   const [mode, setMode] = useState<ImportMode>('文件')
   const [textValue, setTextValue] = useState('')
   const [fileContent, setFileContent] = useState('')
+
+  const handleAfterOpenChange = useCallback((visible: boolean) => {
+    if (visible) {
+      if (defaultTextValue) {
+        setMode('文本')
+        setTextValue(defaultTextValue)
+      }
+      else {
+        setMode('文件')
+        setTextValue('')
+      }
+      setFileContent('')
+    }
+  }, [defaultTextValue])
 
   function reset() {
     setTextValue('')
@@ -57,7 +74,7 @@ function ImportModal({ open, onClose, onApply }: ImportModalProps) {
 
   return (
     <Modal
-      title="导入配置"
+      title={title}
       open={open}
       onOk={handleOk}
       onCancel={handleClose}
@@ -65,6 +82,7 @@ function ImportModal({ open, onClose, onApply }: ImportModalProps) {
       cancelText="取消"
       okButtonProps={{ disabled: mode === '文件' ? !fileContent : !textValue.trim() }}
       destroyOnHidden
+      afterOpenChange={handleAfterOpenChange}
     >
       <Segmented
         block
@@ -88,7 +106,7 @@ function ImportModal({ open, onClose, onApply }: ImportModalProps) {
               rows={10}
               value={textValue}
               onChange={e => setTextValue(e.target.value)}
-              placeholder='粘贴 JSON 配置，例如：&#10;{&#10;  "container": { "width": 800, "height": 800 },&#10;  "blocks": [...]&#10;}'
+              placeholder={placeholder ?? '粘贴 JSON 配置，例如：\n{\n  "container": { "width": 800, "height": 800 },\n  "blocks": [...]\n}'}
             />
           )}
     </Modal>

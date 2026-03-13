@@ -15,6 +15,17 @@ interface UseImportExportOptions {
   setBlocks: Dispatch<SetStateAction<Block[]>>
 }
 
+export function validateBlockData(data: unknown): data is Block {
+  if (typeof data !== 'object' || data === null)
+    return false
+  const b = data as Record<string, unknown>
+  return typeof b.top === 'number'
+    && typeof b.left === 'number'
+    && typeof b.zIndex === 'number'
+    && typeof b.key === 'string'
+    && registerConfig.componentMap.has(b.key as Parameters<typeof registerConfig.componentMap.has>[0])
+}
+
 export function validateEditorData(data: unknown): data is EditorData {
   if (typeof data !== 'object' || data === null)
     return false
@@ -71,6 +82,38 @@ export function useImportExport({ blocks, container, setBlocks }: UseImportExpor
     }
   }
 
+  const [replaceImportModalOpen, setReplaceImportModalOpen] = useState(false)
+
+  function openReplaceImportModal() {
+    setReplaceImportModalOpen(true)
+  }
+
+  function closeReplaceImportModal() {
+    setReplaceImportModalOpen(false)
+  }
+
+  function applyReplaceImport(jsonStr: string, selectedIndexes: number[]) {
+    try {
+      const data = JSON.parse(jsonStr)
+      if (!validateBlockData(data)) {
+        message.error('JSON 格式不正确或包含未注册的组件')
+        return false
+      }
+      setBlocks(prev => prev.map((block, index) => {
+        if (selectedIndexes.includes(index)) {
+          return { ...data, top: block.top, left: block.left, zIndex: block.zIndex }
+        }
+        return block
+      }))
+      message.success('导入替换成功')
+      return true
+    }
+    catch {
+      message.error('JSON 解析失败，请检查格式')
+      return false
+    }
+  }
+
   const [exportModalOpen, setExportModalOpen] = useState(false)
 
   function openExportModal() {
@@ -109,6 +152,10 @@ export function useImportExport({ blocks, container, setBlocks }: UseImportExpor
     openImportModal,
     closeImportModal,
     applyImport,
+    replaceImportModalOpen,
+    openReplaceImportModal,
+    closeReplaceImportModal,
+    applyReplaceImport,
     exportModalOpen,
     openExportModal,
     closeExportModal,
