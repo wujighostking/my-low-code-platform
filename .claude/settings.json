@@ -5,7 +5,10 @@
       "Bash(xargs grep:*)",
       "Bash(grep -r \"redux\\\\|zustand\\\\|recoil\\\\|atom\\\\|createContext\\\\|useContext\" /d/project/my-project/my-low-code-platform/packages/main/src --include=*.ts --include=*.tsx)",
       "Bash(npx turbo:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(find /d/project/my-project/my-low-code-platform -maxdepth 2 -name .env* -o -name *.env)",
+      "Bash(pnpm dev:nest)"
     ]
   }
 }
