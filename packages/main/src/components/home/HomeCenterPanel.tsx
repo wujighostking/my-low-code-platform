@@ -1,6 +1,6 @@
-import { DeleteOutlined, ExportOutlined, EyeOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, FormOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
 import { Button, Layout, Space, Tooltip } from 'antd'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
@@ -48,6 +48,7 @@ function HomeCenterPanel() {
   const { importModalOpen, openImportModal, closeImportModal, applyImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
 
   const navigate = useNavigate()
+  const [isEditing, setIsEditing] = useState(true)
 
   const openPreview = useCallback(() => {
     sessionStorage.setItem('preview-data', JSON.stringify({ container: { width, height }, blocks }))
@@ -89,8 +90,18 @@ function HomeCenterPanel() {
     executeCommand(new ChangeZIndexCommand(updates))
   }, [blocks, selectedBlockIndexes, executeCommand])
 
+  const toggleEditing = useCallback(() => {
+    setIsEditing((prev) => {
+      if (prev)
+        clearSelection()
+      return !prev
+    })
+  }, [clearSelection])
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (!isEditing)
+        return
       const key = event.key.toLowerCase()
       if (event.ctrlKey && key === 'z') {
         event.preventDefault()
@@ -107,7 +118,7 @@ function HomeCenterPanel() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [undo, redo, deleteSelected])
+  }, [isEditing, undo, redo, deleteSelected])
 
   const renderBlock = (block: (typeof blocks)[number], index: number) => {
     const config = registerConfig.componentMap.get(block.key as Parameters<typeof registerConfig.componentMap.get>[0])
@@ -121,8 +132,8 @@ function HomeCenterPanel() {
       <div
         key={`${block.key}-${index}`}
         ref={element => setBlockElement(index, element)}
-        onMouseDown={event => handleBlockMouseDown(event, index)}
-        onClick={event => event.stopPropagation()}
+        onMouseDown={isEditing ? event => handleBlockMouseDown(event, index) : undefined}
+        onClick={isEditing ? event => event.stopPropagation() : undefined}
         className="rounded-md select-none"
         style={{
           position: 'absolute',
@@ -130,8 +141,8 @@ function HomeCenterPanel() {
           left: block.left,
           zIndex: block.zIndex,
           transform: 'translate(-50%, -50%)',
-          cursor: isDragging ? 'grabbing' : isSelected ? 'grab' : 'pointer',
-          boxShadow: isSelected ? '0 0 0 2px #1677ff' : 'none',
+          cursor: isEditing ? (isDragging ? 'grabbing' : isSelected ? 'grab' : 'pointer') : 'default',
+          boxShadow: isEditing && isSelected ? '0 0 0 2px #1677ff' : 'none',
         }}
       >
         {config.render()}
@@ -186,36 +197,36 @@ function HomeCenterPanel() {
         <Header className="bg-white border-b border-[#f0f0f0] px-4 flex items-center justify-between">
           <Space>
             <Tooltip title="撤销 (Ctrl+Z)">
-              <Button disabled={!canUndo} onClick={undo}>
+              <Button disabled={!isEditing || !canUndo} onClick={undo}>
                 <UndoOutlined />
                 撤销
               </Button>
             </Tooltip>
             <Tooltip title="重做 (Ctrl+Y)">
-              <Button disabled={!canRedo} onClick={redo}>
+              <Button disabled={!isEditing || !canRedo} onClick={redo}>
                 <RedoOutlined />
                 重做
               </Button>
             </Tooltip>
             <Tooltip title="置顶">
-              <Button disabled={selectedBlockIndexes.length === 0} onClick={bringToFront}>
+              <Button disabled={!isEditing || selectedBlockIndexes.length === 0} onClick={bringToFront}>
                 <VerticalAlignTopOutlined />
                 置顶
               </Button>
             </Tooltip>
             <Tooltip title="置底">
-              <Button disabled={selectedBlockIndexes.length === 0} onClick={sendToBack}>
+              <Button disabled={!isEditing || selectedBlockIndexes.length === 0} onClick={sendToBack}>
                 <VerticalAlignBottomOutlined />
                 置底
               </Button>
             </Tooltip>
             <Tooltip title="删除 (Delete)">
-              <Button disabled={selectedBlockIndexes.length === 0} onClick={deleteSelected}>
+              <Button disabled={!isEditing || selectedBlockIndexes.length === 0} onClick={deleteSelected}>
                 <DeleteOutlined />
                 删除
               </Button>
             </Tooltip>
-            <Button onClick={openImportModal}>
+            <Button disabled={!isEditing} onClick={openImportModal}>
               <ImportOutlined />
               导入
             </Button>
@@ -227,16 +238,22 @@ function HomeCenterPanel() {
               <EyeOutlined />
               预览
             </Button>
+            <Tooltip title={isEditing ? '关闭编辑' : '启用编辑'}>
+              <Button type={isEditing ? 'primary' : 'default'} onClick={toggleEditing}>
+                {isEditing ? <FormOutlined /> : <EditOutlined />}
+                {isEditing ? '关闭编辑' : '启用编辑'}
+              </Button>
+            </Tooltip>
           </Space>
         </Header>
 
         <Content className="p-4 overflow-auto">
           <div
             ref={canvasRef}
-            onDragOver={handleCanvasDragOver}
-            onDragLeave={handleCanvasDragLeave}
-            onDrop={handleCanvasDrop}
-            onClick={clearSelection}
+            onDragOver={isEditing ? handleCanvasDragOver : undefined}
+            onDragLeave={isEditing ? handleCanvasDragLeave : undefined}
+            onDrop={isEditing ? handleCanvasDrop : undefined}
+            onClick={isEditing ? clearSelection : undefined}
             className={`mx-auto rounded-xl border border-dashed bg-white transition-colors ${
               isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'
             }`}
