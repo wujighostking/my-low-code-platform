@@ -1,6 +1,6 @@
 import type { MenuProps } from 'antd'
-import { DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, FormOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
-import { Button, Dropdown, Layout, Space, Tooltip } from 'antd'
+import { CodeOutlined, DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, FormOutlined, ImportOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
+import { Button, Dropdown, Layout, Modal, Space, Tooltip } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
@@ -52,6 +52,7 @@ function HomeCenterPanel() {
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(true)
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
+  const [viewDataBlock, setViewDataBlock] = useState<(typeof blocks)[number] | null>(null)
 
   const openPreview = useCallback(() => {
     sessionStorage.setItem('preview-data', JSON.stringify({ container: { width, height }, blocks }))
@@ -123,6 +124,12 @@ function HomeCenterPanel() {
     { key: 'delete', label: '删除', icon: <DeleteOutlined />, shortcut: 'Delete', disabled: !hasSelection, danger: true, onClick: deleteSelected },
   ], [canUndo, canRedo, hasSelection, undo, redo, bringToFront, sendToBack, deleteSelected])
 
+  const viewSelectedData = useCallback(() => {
+    if (selectedBlockIndexes.length === 0)
+      return
+    setViewDataBlock(blocks[selectedBlockIndexes[0]])
+  }, [blocks, selectedBlockIndexes])
+
   const contextMenuItems: MenuProps['items'] = useMemo(() => {
     const actionItems = toolbarActions.map(({ key, label, icon, shortcut, disabled, danger, onClick }) => ({
       key,
@@ -143,9 +150,20 @@ function HomeCenterPanel() {
       actionItems[2],
       actionItems[3],
       { type: 'divider' as const },
+      {
+        key: 'viewData',
+        label: '查看数据',
+        icon: <CodeOutlined />,
+        disabled: !hasSelection,
+        onClick: () => {
+          viewSelectedData()
+          closeContextMenu()
+        },
+      },
+      { type: 'divider' as const },
       actionItems[4],
     ]
-  }, [toolbarActions, closeContextMenu])
+  }, [toolbarActions, closeContextMenu, hasSelection, viewSelectedData])
 
   const toggleEditing = useCallback(() => {
     setIsEditing((prev) => {
@@ -330,6 +348,17 @@ function HomeCenterPanel() {
       </Layout>
       <ImportModal open={importModalOpen} onClose={closeImportModal} onApply={applyImport} />
       <ExportModal open={exportModalOpen} onClose={closeExportModal} getJson={getExportJson} onDownload={downloadAsFile} onCopy={copyToClipboard} />
+      <Modal
+        title="组件数据"
+        open={viewDataBlock !== null}
+        onCancel={() => setViewDataBlock(null)}
+        footer={null}
+        width={600}
+      >
+        <pre style={{ maxHeight: 400, overflow: 'auto', background: '#f5f5f5', padding: 12, borderRadius: 6, fontSize: 13 }}>
+          {JSON.stringify(viewDataBlock, null, 2)}
+        </pre>
+      </Modal>
     </>
   )
 }

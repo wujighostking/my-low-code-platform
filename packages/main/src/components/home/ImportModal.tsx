@@ -64,7 +64,7 @@ function ImportModal({ open, onClose, onApply }: ImportModalProps) {
       okText="导入"
       cancelText="取消"
       okButtonProps={{ disabled: mode === '文件' ? !fileContent : !textValue.trim() }}
-      destroyOnClose
+      destroyOnHidden
     >
       <Segmented
         block

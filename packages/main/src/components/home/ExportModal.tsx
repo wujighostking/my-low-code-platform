@@ -23,7 +23,7 @@ function ExportModal({ open, onClose, getJson, onDownload, onCopy }: ExportModal
       open={open}
       onCancel={onClose}
       footer={null}
-      destroyOnClose
+      destroyOnHidden
     >
       <Segmented
         block
