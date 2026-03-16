@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common'
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateUserDto } from './dto/create-user.dto'
@@ -25,15 +25,28 @@ export class UsersService {
     return this.userRepository.find()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`
+  async findOne(id: number) {
+    const user = await this.userRepository.findOneBy({ id })
+    if (!user) {
+      throw new NotFoundException(`用户 #${id} 不存在`)
+    }
+    return user
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.findOne(id)
+    if (updateUserDto.username && updateUserDto.username !== user.username) {
+      const existing = await this.userRepository.findOneBy({ username: updateUserDto.username })
+      if (existing) {
+        throw new ConflictException('username 已存在')
+      }
+    }
+    Object.assign(user, updateUserDto)
+    return this.userRepository.save(user)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`
+  async remove(id: number) {
+    const user = await this.findOne(id)
+    return this.userRepository.remove(user)
   }
 }
