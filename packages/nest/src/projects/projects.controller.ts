@@ -1,20 +1,22 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '../auth/auth.guard'
 import { CreateProjectDto } from './dto/create-project.dto'
 import { UpdateProjectDto } from './dto/update-project.dto'
 import { ProjectsService } from './projects.service'
 
 @Controller('projects')
+@UseGuards(AuthGuard)
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
-    return this.projectsService.create(createProjectDto)
+  create(@Body() createProjectDto: CreateProjectDto, @Req() req: any) {
+    return this.projectsService.create(createProjectDto, req.user.id)
   }
 
   @Get()
-  findAll() {
-    return this.projectsService.findAll()
+  findAll(@Req() req: any) {
+    return this.projectsService.findByUserId(req.user.id)
   }
 
   @Get(':id')

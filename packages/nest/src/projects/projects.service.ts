@@ -12,13 +12,13 @@ export class ProjectsService {
     private readonly projectRepository: Repository<Project>,
   ) {}
 
-  create(createProjectDto: CreateProjectDto) {
-    const project = this.projectRepository.create(createProjectDto)
+  create(createProjectDto: CreateProjectDto, userId: number) {
+    const project = this.projectRepository.create({ ...createProjectDto, userId })
     return this.projectRepository.save(project)
   }
 
-  findAll() {
-    return this.projectRepository.find()
+  findByUserId(userId: number) {
+    return this.projectRepository.findBy({ userId })
   }
 
   async findOne(id: number) {
