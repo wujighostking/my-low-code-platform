@@ -14,4 +14,11 @@ export default defineConfig(
       'no-console': 'warn',
     },
   },
+  {
+    files: ['packages/nest/**/*.ts'],
+    rules: {
+      'ts/consistent-type-imports': 'off',
+      'unused-imports/no-unused-vars': 'off',
+    },
+  },
 )
