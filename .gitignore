@@ -17,6 +17,7 @@ packages/element-plus/version.ts
 
 # local env files
 *.local
+.env
 .eslintcache
 cypress/screenshots/*
 cypress/videos/*
