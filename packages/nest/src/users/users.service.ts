@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateUserDto } from './dto/create-user.dto'
@@ -12,7 +12,11 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
+    const existing = await this.userRepository.findOneBy({ username: createUserDto.username })
+    if (existing) {
+      throw new ConflictException('username 已存在')
+    }
     const user = this.userRepository.create(createUserDto)
     return this.userRepository.save(user)
   }
