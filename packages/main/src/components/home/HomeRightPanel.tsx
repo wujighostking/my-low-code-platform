@@ -1,7 +1,8 @@
 import type { GetCanvasDataRef } from '@/views/Home'
-import { SaveOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Layout, message } from 'antd'
+import { LogoutOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons'
+import { Avatar, Button, Dropdown, Layout, message } from 'antd'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { updateProject } from '@/api/projects'
 
 const { Sider } = Layout
@@ -12,7 +13,24 @@ interface HomeRightPanelProps {
 }
 
 function HomeRightPanel({ projectId, getCanvasDataRef }: HomeRightPanelProps) {
+  const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
+
+  const [username] = useState(() => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token)
+        return ''
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      return payload.username ?? ''
+    }
+    catch { return '' }
+  })
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    navigate('/login')
+  }
 
   const handleSave = async () => {
     if (!projectId) {
@@ -42,7 +60,12 @@ function HomeRightPanel({ projectId, getCanvasDataRef }: HomeRightPanelProps) {
     >
       <div className="h-[64px] flex items-center justify-end gap-2 px-4 border-b border-[#f0f0f0]">
         <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={handleSave}>保存</Button>
-        <Button icon={<UserOutlined />} />
+        <Dropdown menu={{ items: [{ key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: handleLogout }] }} placement="bottomRight">
+          <div className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-2 hover:bg-#f5f5f5 transition-colors">
+            <Avatar size="small" icon={<UserOutlined />} className="bg-#667eea" />
+            <span className="text-3.5 color-#333">{username}</span>
+          </div>
+        </Dropdown>
       </div>
       <div className="h-[calc(100%-64px)] p-4 pt-0">
         <div className="h-full rounded-lg border border-dashed border-[#e5e7eb] bg-[#fafafa]" />
