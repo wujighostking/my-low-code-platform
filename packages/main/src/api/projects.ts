@@ -10,3 +10,7 @@ export interface Project {
 export function getProjects() {
   return request.get<unknown, Project[]>('/projects')
 }
+
+export function createProject(data: { projectName: string }) {
+  return request.post<unknown, Project>('/projects', data)
+}
