@@ -17,4 +17,7 @@ export class Project {
 
   @Column()
   userId: number
+
+  @Column({ default: false })
+  isDeleted: boolean
 }

@@ -18,11 +18,11 @@ export class ProjectsService {
   }
 
   findByUserId(userId: number) {
-    return this.projectRepository.findBy({ userId })
+    return this.projectRepository.findBy({ userId, isDeleted: false })
   }
 
   async findOne(id: number) {
-    const project = await this.projectRepository.findOneBy({ id })
+    const project = await this.projectRepository.findOneBy({ id, isDeleted: false })
     if (!project) {
       throw new NotFoundException(`项目 #${id} 不存在`)
     }
@@ -37,6 +37,7 @@ export class ProjectsService {
 
   async remove(id: number) {
     const project = await this.findOne(id)
-    return this.projectRepository.remove(project)
+    project.isDeleted = true
+    return this.projectRepository.save(project)
   }
 }
