@@ -1,5 +1,5 @@
 import type { Project } from '@/api/projects'
-import { AppstoreOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { AppstoreOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { Card } from 'antd'
 
 interface ProjectCardProps {
@@ -19,6 +19,7 @@ function ProjectCard({ project, onView, onDelete }: ProjectCardProps) {
           <AppstoreOutlined className="color-white text-5" />
         </div>
         <h3 className="text-4 font-500 m-0 truncate flex-1">{project.projectName}</h3>
+        <EyeOutlined className="text-4 color-#999 hover:color-#667eea" />
         <EditOutlined className="text-4 color-#999 hover:color-#667eea" onClick={() => onView(project)} />
         <DeleteOutlined className="text-4 color-#999 hover:color-red" onClick={() => onDelete(project)} />
       </div>
