@@ -1,5 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
+import type { GetCanvasDataRef } from '@/views/Home'
 import { Layout, Modal } from 'antd'
+import { useEffect } from 'react'
 import { useCanvasActions } from '@/hooks/useCanvasActions'
 import { useCanvasContextMenu } from '@/hooks/useCanvasContextMenu'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
@@ -18,9 +20,10 @@ const { Header, Content } = Layout
 interface HomeCenterPanelProps {
   isPreviewing: boolean
   setIsPreviewing: Dispatch<SetStateAction<boolean>>
+  getCanvasDataRef: GetCanvasDataRef
 }
 
-function HomeCenterPanel({ isPreviewing, setIsPreviewing }: HomeCenterPanelProps) {
+function HomeCenterPanel({ isPreviewing, setIsPreviewing, getCanvasDataRef }: HomeCenterPanelProps) {
   const {
     isDragOver,
     blocks,
@@ -55,6 +58,10 @@ function HomeCenterPanel({ isPreviewing, setIsPreviewing }: HomeCenterPanelProps
   })
 
   const { importModalOpen, openImportModal, closeImportModal, applyImport, replaceImportModalOpen, openReplaceImportModal, closeReplaceImportModal, applyReplaceImport, exportModalOpen, openExportModal, closeExportModal, getExportJson, downloadAsFile, copyToClipboard } = useImportExport({ blocks, container: { width, height }, setBlocks })
+
+  useEffect(() => {
+    getCanvasDataRef.current = getExportJson
+  }, [getCanvasDataRef, getExportJson])
 
   const { isEditing, openPreview, closePreview, toggleEditing } = useEditorMode({ clearSelection, setIsPreviewing })
 

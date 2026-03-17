@@ -15,6 +15,10 @@ export function createProject(data: { projectName: string }) {
   return request.post<unknown, Project>('/projects', data)
 }
 
+export function updateProject(id: number, data: { content: string }) {
+  return request.patch<unknown, Project>(`/projects/${id}`, data)
+}
+
 export function deleteProject(id: number) {
   return request.delete(`/projects/${id}`)
 }
