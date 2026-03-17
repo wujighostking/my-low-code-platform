@@ -110,10 +110,10 @@ function HomeCenterPanel({ isPreviewing, setIsPreviewing }: HomeCenterPanelProps
                   closeContextMenu()
                 }
               : undefined}
-            className={`mx-auto rounded-xl bg-white transition-colors ${
+            className={`mx-auto rounded-xl bg-white transition-colors relative ${
               isPreviewing ? 'shadow-lg' : `border border-dashed ${isDragOver ? 'border-[#1677ff] bg-[#f0f7ff]' : 'border-[#d9d9d9]'}`
             }`}
-            style={{ width, height, position: 'relative' }}
+            style={{ width, height }}
           >
             {blocks.map((block, index) => (
               <CanvasBlock
@@ -160,7 +160,7 @@ function HomeCenterPanel({ isPreviewing, setIsPreviewing }: HomeCenterPanelProps
         footer={null}
         width={600}
       >
-        <pre style={{ maxHeight: 400, overflow: 'auto', background: '#f5f5f5', padding: 12, borderRadius: 6, fontSize: 13 }}>
+        <pre className="max-h-100 overflow-auto bg-#f5f5f5 p-3 rounded-1.5 text-3.25">
           {JSON.stringify(viewDataBlock, null, 2)}
         </pre>
       </Modal>

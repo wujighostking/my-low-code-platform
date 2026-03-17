@@ -26,28 +26,16 @@ function Login() {
   return (
     <>
       <Spin spinning={loading} fullscreen />
-      <div
-        className="min-h-screen center"
-        style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        }}
-      >
+      <div className="min-h-screen bg-gradient-to-br from-#667eea to-#764ba2 center">
         <Card
           style={{ width: 400, borderRadius: 12 }}
           styles={{ body: { padding: '40px 32px' } }}
         >
-          <div className="text-center" style={{ marginBottom: 32 }}>
-            <h1
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: '#1a1a2e',
-                margin: 0,
-              }}
-            >
+          <div className="text-center mb-8">
+            <h1 className="text-7 font-700 color-#1a1a2e m-0">
               低代码平台
             </h1>
-            <p style={{ color: '#999', marginTop: 8, fontSize: 14 }}>
+            <p className="color-#999 mt-2 text-3.5">
               可视化搭建，高效创造
             </p>
           </div>
