@@ -35,6 +35,12 @@ export class ProjectsService {
     return this.projectRepository.save(project)
   }
 
+  async updateName(id: number, projectName: string) {
+    const project = await this.findOne(id)
+    project.projectName = projectName
+    return this.projectRepository.save(project)
+  }
+
   async remove(id: number) {
     const project = await this.findOne(id)
     project.isDeleted = true

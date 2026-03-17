@@ -25,7 +25,7 @@ function Project() {
   useEffect(fetchProjects, [])
 
   const handleView = (project: ProjectType) => {
-    navigate('/', { state: { projectId: project.id } })
+    navigate('/', { state: { projectId: project.id, projectName: project.projectName } })
   }
 
   const handleDelete = (project: ProjectType) => {

@@ -29,6 +29,11 @@ export class ProjectsController {
     return this.projectsService.update(id, updateProjectDto)
   }
 
+  @Patch(':id/name')
+  updateName(@Param('id', ParseIntPipe) id: number, @Body('projectName') projectName: string) {
+    return this.projectsService.updateName(id, projectName)
+  }
+
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.projectsService.remove(id)
