@@ -2,6 +2,7 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message, Spin } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { login } from '@/api/auth'
 
 function Login() {
   const navigate = useNavigate()
@@ -11,24 +12,12 @@ function Login() {
   const onFinish = async (values: { username: string, password: string }) => {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      })
-      const data = await res.json()
-      if (data.status === 0) {
-        localStorage.setItem('token', data.data.access_token)
-        message.success('登录成功')
-        navigate('/')
-      }
-      else {
-        message.error(data.message || '登录失败')
-      }
+      const data = await login(values)
+      localStorage.setItem('token', data.access_token)
+      message.success('登录成功')
+      navigate('/')
     }
-    catch {
-      message.error('网络错误，请稍后重试')
-    }
+    catch { /* request 拦截器已处理错误提示 */ }
     finally {
       setLoading(false)
     }
