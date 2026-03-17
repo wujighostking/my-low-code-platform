@@ -18,12 +18,13 @@ import ImportModal from './ImportModal'
 const { Header, Content } = Layout
 
 interface HomeCenterPanelProps {
+  projectId?: number
   isPreviewing: boolean
   setIsPreviewing: Dispatch<SetStateAction<boolean>>
   getCanvasDataRef: GetCanvasDataRef
 }
 
-function HomeCenterPanel({ isPreviewing, setIsPreviewing, getCanvasDataRef }: HomeCenterPanelProps) {
+function HomeCenterPanel({ projectId, isPreviewing, setIsPreviewing, getCanvasDataRef }: HomeCenterPanelProps) {
   const {
     isDragOver,
     blocks,
@@ -40,7 +41,7 @@ function HomeCenterPanel({ isPreviewing, setIsPreviewing, getCanvasDataRef }: Ho
     redo,
     canUndo,
     canRedo,
-  } = useCanvasDrop()
+  } = useCanvasDrop(projectId)
 
   const {
     selectedBlockIndexes,

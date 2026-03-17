@@ -23,6 +23,10 @@ export function updateProjectName(id: number, projectName: string) {
   return request.patch<unknown, Project>(`/projects/${id}/name`, { projectName })
 }
 
+export function getProjectById(id: number) {
+  return request.get<unknown, Project>(`/projects/${id}`)
+}
+
 export function deleteProject(id: number) {
   return request.delete(`/projects/${id}`)
 }

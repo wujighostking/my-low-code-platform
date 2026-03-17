@@ -1,8 +1,9 @@
 import type { DragEvent } from 'react'
-import { useCallback, useRef, useState } from 'react'
-import editorData from '@/../public/data/data.json'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { getProjectById } from '@/api/projects'
 import { AddBlockCommand, MoveBlocksCommand } from '@/commands'
 import { useCommandHistory } from '@/hooks/useCommandHistory'
+import { validateEditorData } from '@/hooks/useImportExport'
 import { registerConfig } from '@/utils/editorConfig'
 
 export interface Block {
@@ -18,12 +19,32 @@ interface BlockPositionUpdate {
   left: number
 }
 
-export function useCanvasDrop() {
+const DEFAULT_CONTAINER = { width: 800, height: 800 }
+
+export function useCanvasDrop(projectId?: number) {
   const [isDragOver, setIsDragOver] = useState(false)
-  const [blocks, setBlocks] = useState<Block[]>(editorData.blocks)
+  const [blocks, setBlocks] = useState<Block[]>([])
+  const [container, setContainer] = useState(DEFAULT_CONTAINER)
   const canvasRef = useRef<HTMLDivElement>(null)
 
-  const { width, height } = editorData.container
+  useEffect(() => {
+    if (projectId == null)
+      return
+    getProjectById(projectId).then((project) => {
+      if (!project.content)
+        return
+      try {
+        const data = JSON.parse(project.content)
+        if (!validateEditorData(data))
+          return
+        setContainer(data.container)
+        setBlocks(data.blocks)
+      }
+      catch { /* ignore invalid JSON */ }
+    })
+  }, [projectId])
+
+  const { width, height } = container
 
   const { executeCommand, undo, redo, canUndo, canRedo } = useCommandHistory({ setBlocks })
 
