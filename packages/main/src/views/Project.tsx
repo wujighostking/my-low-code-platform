@@ -1,6 +1,6 @@
 import type { Project as ProjectType } from '@/api/projects'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Empty, Input, message, Modal, Spin } from 'antd'
+import { LogoutOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
+import { Avatar, Button, Dropdown, Empty, Input, message, Modal, Spin } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createProject, deleteProject, getProjects } from '@/api/projects'
@@ -14,6 +14,22 @@ function Project() {
   const [projectName, setProjectName] = useState('')
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  const [username] = useState(() => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token)
+        return ''
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      return payload.username ?? ''
+    }
+    catch { return '' }
+  })
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    navigate('/login')
+  }
 
   const fetchProjects = () => {
     getProjects()
@@ -82,9 +98,17 @@ function Project() {
       <Spin spinning={deleting || creating} fullscreen style={{ zIndex: 2000 }} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-6 font-600 color-#1a1a2e m-0">我的项目</h1>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
-          新建项目
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
+            新建项目
+          </Button>
+          <Dropdown menu={{ items: [{ key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: handleLogout }] }} placement="bottomRight">
+            <div className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-2 hover:bg-white transition-colors">
+              <Avatar size="small" icon={<UserOutlined />} className="bg-#667eea" />
+              <span className="text-3.5 color-#333">{username}</span>
+            </div>
+          </Dropdown>
+        </div>
       </div>
       {
         projects.length === 0
