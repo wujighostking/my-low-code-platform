@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
+import { AppLayout } from '@/router/AppLayout'
 import { toRouteElement } from '@/router/RouteElements.tsx'
 
 type ViewLoader = Parameters<typeof toRouteElement>[0]
@@ -19,9 +20,9 @@ function toRoutePath(filePath: string) {
   return `/${kebabName}`
 }
 
-// 生成页面路由（排除 NotFound，避免和兜底路由重复）
+// 生成页面路由（排除 NotFound 和 Login）
 const pageRoutes = Object.entries(viewModules)
-  .filter(([filePath]) => !filePath.endsWith('/NotFound.tsx'))
+  .filter(([filePath]) => !filePath.endsWith('/NotFound.tsx') && !filePath.endsWith('/Login.tsx'))
   .map(([filePath, loader]) => ({
     path: toRoutePath(filePath),
     element: toRouteElement(loader as ViewLoader),
@@ -37,12 +38,25 @@ const pageRoutes = Object.entries(viewModules)
     return a.path.localeCompare(b.path)
   })
 
+// Login 路由放在 layout 外（不需要心跳检测）
+const loginLoader = viewModules['../views/Login.tsx']
+const loginRoute = loginLoader
+  ? [{ path: '/login', element: toRouteElement(loginLoader as ViewLoader) }]
+  : []
+
 // 单独挂载 404 兜底路由
 const notFoundLoader = viewModules['../views/NotFound.tsx']
 const fallbackRoutes = notFoundLoader
   ? [{ path: '*', element: toRouteElement(notFoundLoader as ViewLoader) }]
   : []
 
-const router = createBrowserRouter([...pageRoutes, ...fallbackRoutes])
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: pageRoutes,
+  },
+  ...loginRoute,
+  ...fallbackRoutes,
+])
 
 export default router
