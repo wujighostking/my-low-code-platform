@@ -1,0 +1,12 @@
+import request from '@/utils/request'
+
+export interface Project {
+  id: number
+  projectName: string
+  content: string | null
+  userId: number
+}
+
+export function getProjects() {
+  return request.get<unknown, Project[]>('/projects')
+}

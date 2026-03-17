@@ -15,7 +15,7 @@ function Login() {
       const data = await login(values)
       localStorage.setItem('token', data.access_token)
       message.success('登录成功')
-      navigate('/')
+      navigate('/project')
     }
     catch { /* request 拦截器已处理错误提示 */ }
     finally {
