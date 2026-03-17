@@ -1,37 +1,19 @@
 import type { Project as ProjectType } from '@/api/projects'
-import { AppstoreOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Empty, Input, message, Modal, Spin } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { Button, Empty, Input, message, Modal, Spin } from 'antd'
 import { useEffect, useState } from 'react'
-import { createProject, getProjects } from '@/api/projects'
-
-function ProjectCard({ project }: { project: ProjectType }) {
-  return (
-    <Card
-      key={project.id}
-      hoverable
-      className="rounded-xl"
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-#667eea to-#764ba2 center">
-          <AppstoreOutlined className="color-white text-5" />
-        </div>
-        <h3 className="text-4 font-500 m-0 truncate">{project.projectName}</h3>
-      </div>
-      <p className="color-#999 text-3.5 m-0">
-        项目 ID:
-        {' '}
-        {project.id}
-      </p>
-    </Card>
-  )
-}
+import { useNavigate } from 'react-router-dom'
+import { createProject, deleteProject, getProjects } from '@/api/projects'
+import ProjectCard from '@/components/project/ProjectCard'
 
 function Project() {
+  const navigate = useNavigate()
   const [projects, setProjects] = useState<ProjectType[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const fetchProjects = () => {
     getProjects()
@@ -42,6 +24,32 @@ function Project() {
 
   useEffect(fetchProjects, [])
 
+  const handleView = (project: ProjectType) => {
+    navigate('/', { state: { projectId: project.id } })
+  }
+
+  const handleDelete = (project: ProjectType) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除项目「${project.projectName}」吗？`,
+      okText: '删除',
+      okType: 'danger',
+      zIndex: 1000,
+      onOk: async () => {
+        setDeleting(true)
+        try {
+          await deleteProject(project.id)
+          message.success('删除成功')
+          fetchProjects()
+        }
+        catch { /* request 拦截器已处理错误提示 */ }
+        finally {
+          setDeleting(false)
+        }
+      },
+    })
+  }
+
   const handleCreate = async () => {
     if (!projectName.trim()) {
       message.warning('请输入项目名称')
@@ -49,11 +57,11 @@ function Project() {
     }
     setCreating(true)
     try {
-      await createProject({ projectName: projectName.trim() })
+      const newProject = await createProject({ projectName: projectName.trim() })
       message.success('创建成功')
       setModalOpen(false)
       setProjectName('')
-      fetchProjects()
+      navigate('/', { state: { projectId: newProject.id } })
     }
     catch { /* request 拦截器已处理错误提示 */ }
     finally {
@@ -71,6 +79,7 @@ function Project() {
 
   return (
     <div className="min-h-screen bg-#f5f7fa p-8">
+      <Spin spinning={deleting || creating} fullscreen style={{ zIndex: 2000 }} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-6 font-600 color-#1a1a2e m-0">我的项目</h1>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
@@ -82,7 +91,7 @@ function Project() {
           ? <Empty description="暂无项目" />
           : (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
-                { projects.map(project => (<ProjectCard key={project.id} project={project} />)) }
+                { projects.map(project => (<ProjectCard key={project.id} project={project} onView={handleView} onDelete={handleDelete} />)) }
               </div>
             )
       }

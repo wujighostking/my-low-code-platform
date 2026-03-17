@@ -14,3 +14,7 @@ export function getProjects() {
 export function createProject(data: { projectName: string }) {
   return request.post<unknown, Project>('/projects', data)
 }
+
+export function deleteProject(id: number) {
+  return request.delete(`/projects/${id}`)
+}
