@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { Block } from '@/hooks/useCanvasDrop'
 import { message } from 'antd'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { registerConfig } from '@/utils/editorConfig'
 
 interface EditorData {
@@ -124,12 +124,12 @@ export function useImportExport({ blocks, container, setBlocks }: UseImportExpor
     setExportModalOpen(false)
   }
 
-  const getExportJson = useCallback(() => {
+  const getExportJson = () => {
     const data: EditorData = { container, blocks }
     return JSON.stringify(data, null, 2)
-  }, [blocks, container])
+  }
 
-  const downloadAsFile = useCallback(() => {
+  const downloadAsFile = () => {
     const json = getExportJson()
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -139,13 +139,13 @@ export function useImportExport({ blocks, container, setBlocks }: UseImportExpor
     a.click()
     URL.revokeObjectURL(url)
     message.success('导出成功')
-  }, [getExportJson])
+  }
 
-  const copyToClipboard = useCallback(async () => {
+  const copyToClipboard = async () => {
     const json = getExportJson()
     await navigator.clipboard.writeText(json)
     message.success('已复制到剪贴板')
-  }, [getExportJson])
+  }
 
   return {
     importModalOpen,

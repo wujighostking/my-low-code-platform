@@ -1,7 +1,7 @@
 import type { GetCanvasDataRef } from '@/views/Home'
 import { LogoutOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Layout, message, Spin } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { updateProject } from '@/api/projects'
 
@@ -32,7 +32,7 @@ function HomeRightPanel({ projectId, getCanvasDataRef }: HomeRightPanelProps) {
     navigate('/login')
   }
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     if (!projectId) {
       message.warning('未关联项目，无法保存')
       return
@@ -50,7 +50,7 @@ function HomeRightPanel({ projectId, getCanvasDataRef }: HomeRightPanelProps) {
     finally {
       setSaving(false)
     }
-  }, [projectId, getCanvasDataRef])
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

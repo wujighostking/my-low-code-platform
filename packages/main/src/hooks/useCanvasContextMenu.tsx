@@ -2,7 +2,7 @@ import type { MenuProps } from 'antd'
 import type { RefObject } from 'react'
 import type { Block } from '@/hooks/useCanvasDrop'
 import { CodeOutlined, ImportOutlined } from '@ant-design/icons'
-import { useCallback, useMemo, useState } from 'react'
+import { useState } from 'react'
 
 interface UseCanvasContextMenuOptions {
   isEditing: boolean
@@ -21,7 +21,7 @@ export function useCanvasContextMenu({ isEditing, canvasRef, blocks, selectedBlo
   const [replaceTargetBlock, setReplaceTargetBlock] = useState<Block | null>(null)
   const [replaceTargetIndexes, setReplaceTargetIndexes] = useState<number[]>([])
 
-  const handleContextMenu = useCallback((event: React.MouseEvent, blockIndex?: number) => {
+  const handleContextMenu = (event: React.MouseEvent, blockIndex?: number) => {
     event.preventDefault()
     event.stopPropagation()
     if (!isEditing)
@@ -35,17 +35,17 @@ export function useCanvasContextMenu({ isEditing, canvasRef, blocks, selectedBlo
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
     })
-  }, [isEditing, canvasRef, selectedBlockIndexes, applySelection])
+  }
 
   const closeContextMenu = () => setContextMenu(null)
 
-  const viewSelectedData = useCallback(() => {
+  const viewSelectedData = () => {
     if (selectedBlockIndexes.length === 0)
       return
     setViewDataBlock(blocks[selectedBlockIndexes[0]])
-  }, [blocks, selectedBlockIndexes])
+  }
 
-  const contextMenuItems: MenuProps['items'] = useMemo(() => {
+  const contextMenuItems: MenuProps['items'] = (() => {
     const actionItems = toolbarActions.map(({ key, label, icon, shortcut, disabled, danger, onClick }) => ({
       key,
       label,
@@ -90,7 +90,7 @@ export function useCanvasContextMenu({ isEditing, canvasRef, blocks, selectedBlo
       { type: 'divider' as const },
       actionItems[4],
     ]
-  }, [toolbarActions, hasSelection, viewSelectedData, openReplaceImportModal, blocks, selectedBlockIndexes])
+  })()
 
   return {
     contextMenu,

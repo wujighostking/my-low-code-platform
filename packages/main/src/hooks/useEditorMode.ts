@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 interface UseEditorModeOptions {
   clearSelection: () => void
@@ -10,25 +10,25 @@ export function useEditorMode({ clearSelection, setIsPreviewing }: UseEditorMode
   const [isEditing, setIsEditing] = useState(true)
   const [editingBeforePreview, setEditingBeforePreview] = useState(true)
 
-  const openPreview = useCallback(() => {
+  const openPreview = () => {
     setEditingBeforePreview(isEditing)
     clearSelection()
     setIsEditing(false)
     setIsPreviewing(true)
-  }, [isEditing, clearSelection, setIsPreviewing])
+  }
 
-  const closePreview = useCallback(() => {
+  const closePreview = () => {
     setIsPreviewing(false)
     setIsEditing(editingBeforePreview)
-  }, [editingBeforePreview, setIsPreviewing])
+  }
 
-  const toggleEditing = useCallback(() => {
+  const toggleEditing = () => {
     setIsEditing((prev) => {
       if (prev)
         clearSelection()
       return !prev
     })
-  }, [clearSelection])
+  }
 
   return { isEditing, openPreview, closePreview, toggleEditing }
 }

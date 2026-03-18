@@ -1,6 +1,6 @@
 import type { MouseEvent as ReactMouseEvent, RefObject } from 'react'
 import type { Block } from '@/hooks/useCanvasDrop'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const SNAP_THRESHOLD = 5
 
@@ -200,7 +200,7 @@ export function useCanvasSnapDrag(options: UseCanvasSnapDragOptions) {
     }
   }, [onDragEnd, updateBlockPositions, canvasRef])
 
-  const startDrag = useCallback((
+  const startDrag = (
     event: ReactMouseEvent<HTMLDivElement>,
     selectedBlockIndexes: number[],
     referenceIndex: number,
@@ -250,7 +250,7 @@ export function useCanvasSnapDrag(options: UseCanvasSnapDragOptions) {
       snapTargets,
     }
     return true
-  }, [blocks, canvasRef, getBlockElement])
+  }
 
   return {
     guideLines,

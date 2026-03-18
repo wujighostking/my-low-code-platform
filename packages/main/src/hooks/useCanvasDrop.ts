@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getProjectById } from '@/api/projects'
 import { AddBlockCommand, MoveBlocksCommand } from '@/commands'
 import { useCommandHistory } from '@/hooks/useCommandHistory'
@@ -79,7 +79,7 @@ export function useCanvasDrop(projectId?: number) {
     }))
   }
 
-  const updateBlockPositions = useCallback((updates: BlockPositionUpdate[]) => {
+  const updateBlockPositions = (updates: BlockPositionUpdate[]) => {
     if (updates.length === 0)
       return
 
@@ -101,19 +101,19 @@ export function useCanvasDrop(projectId?: number) {
 
       return changed ? next : prev
     })
-  }, [])
+  }
 
-  const updateBlockPosition = useCallback((index: number, top: number, left: number) => {
+  const updateBlockPosition = (index: number, top: number, left: number) => {
     updateBlockPositions([{ index, top, left }])
-  }, [updateBlockPositions])
+  }
 
   /** 拖拽结束时提交移动命令到历史栈 */
-  const commitMoveCommand = useCallback((updates: { index: number, fromTop: number, fromLeft: number, toTop: number, toLeft: number }[]) => {
+  const commitMoveCommand = (updates: { index: number, fromTop: number, fromLeft: number, toTop: number, toLeft: number }[]) => {
     const meaningful = updates.filter(u => u.fromTop !== u.toTop || u.fromLeft !== u.toLeft)
     if (meaningful.length === 0)
       return
     executeCommand(new MoveBlocksCommand(meaningful))
-  }, [executeCommand])
+  }
 
   return {
     isDragOver,

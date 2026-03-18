@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 export function useCanvasSelection() {
   const [selectedBlockIndexes, setSelectedBlockIndexes] = useState<number[]>([])
@@ -19,12 +19,12 @@ export function useCanvasSelection() {
     setSelectedBlockIndexes([])
   }
 
-  const getNextSelectedBlockIndexes = useCallback((index: number, shiftKey: boolean) => {
+  const getNextSelectedBlockIndexes = (index: number, shiftKey: boolean) => {
     const isCurrentSelected = selectedBlockIndexes.includes(index)
     return shiftKey
       ? (isCurrentSelected ? selectedBlockIndexes : [...selectedBlockIndexes, index])
       : (isCurrentSelected ? selectedBlockIndexes : [index])
-  }, [selectedBlockIndexes])
+  }
 
   function applySelection(indexes: number[]) {
     setSelectedBlockIndexes(indexes)

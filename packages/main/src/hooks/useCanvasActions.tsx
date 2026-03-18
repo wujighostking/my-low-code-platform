@@ -1,7 +1,7 @@
 import type { Command } from '@/commands'
 import type { Block } from '@/hooks/useCanvasDrop'
 import { DeleteOutlined, RedoOutlined, UndoOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { ChangeZIndexCommand, DeleteBlocksCommand } from '@/commands'
 
 interface UseCanvasActionsOptions {
@@ -19,7 +19,7 @@ interface UseCanvasActionsOptions {
 export function useCanvasActions({ blocks, selectedBlockIndexes, executeCommand, clearSelection, canUndo, canRedo, undo, redo, isEditing }: UseCanvasActionsOptions) {
   const hasSelection = selectedBlockIndexes.length > 0
 
-  const bringToFront = useCallback(() => {
+  const bringToFront = () => {
     if (selectedBlockIndexes.length === 0)
       return
     const maxZIndex = Math.max(...blocks.map(b => b.zIndex))
@@ -29,9 +29,9 @@ export function useCanvasActions({ blocks, selectedBlockIndexes, executeCommand,
       toZIndex: maxZIndex + 1,
     }))
     executeCommand(new ChangeZIndexCommand(updates))
-  }, [blocks, selectedBlockIndexes, executeCommand])
+  }
 
-  const sendToBack = useCallback(() => {
+  const sendToBack = () => {
     if (selectedBlockIndexes.length === 0)
       return
     const minZIndex = Math.min(...blocks.map(b => b.zIndex))
@@ -41,9 +41,9 @@ export function useCanvasActions({ blocks, selectedBlockIndexes, executeCommand,
       toZIndex: minZIndex - 1,
     }))
     executeCommand(new ChangeZIndexCommand(updates))
-  }, [blocks, selectedBlockIndexes, executeCommand])
+  }
 
-  const deleteSelected = useCallback(() => {
+  const deleteSelected = () => {
     if (selectedBlockIndexes.length === 0)
       return
     const entries = selectedBlockIndexes.map(index => ({
@@ -52,15 +52,15 @@ export function useCanvasActions({ blocks, selectedBlockIndexes, executeCommand,
     }))
     executeCommand(new DeleteBlocksCommand(entries))
     clearSelection()
-  }, [blocks, selectedBlockIndexes, executeCommand, clearSelection])
+  }
 
-  const toolbarActions = useMemo(() => [
+  const toolbarActions = [
     { key: 'undo', label: '撤销', icon: <UndoOutlined />, shortcut: 'Ctrl+Z', disabled: !canUndo, onClick: undo },
     { key: 'redo', label: '重做', icon: <RedoOutlined />, shortcut: 'Ctrl+Y', disabled: !canRedo, onClick: redo },
     { key: 'bringToFront', label: '置顶', icon: <VerticalAlignTopOutlined />, disabled: !hasSelection, onClick: bringToFront },
     { key: 'sendToBack', label: '置底', icon: <VerticalAlignBottomOutlined />, disabled: !hasSelection, onClick: sendToBack },
     { key: 'delete', label: '删除', icon: <DeleteOutlined />, shortcut: 'Delete', disabled: !hasSelection, danger: true, onClick: deleteSelected },
-  ], [canUndo, canRedo, hasSelection, undo, redo, bringToFront, sendToBack, deleteSelected])
+  ]
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {

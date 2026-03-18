@@ -1,4 +1,5 @@
 import defineConfig from '@antfu/eslint-config'
+import reactCompiler from 'eslint-plugin-react-compiler'
 
 export default defineConfig(
   {
@@ -10,8 +11,12 @@ export default defineConfig(
     ignores: ['.codex', '.claude'],
   },
   {
+    plugins: {
+      'react-compiler': reactCompiler,
+    },
     rules: {
       'no-console': 'warn',
+      'react-compiler/react-compiler': 'warn',
     },
   },
   {

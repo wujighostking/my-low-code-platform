@@ -1,7 +1,20 @@
 import type { DragEvent } from 'react'
+import type { Block } from '@/hooks/useCanvasDrop'
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { useCanvasDrop } from '@/hooks/useCanvasDrop'
+
+const INITIAL_BLOCKS: Block[] = [
+  { top: 100, left: 100, zIndex: 1, key: 'text' },
+  { top: 200, left: 100, zIndex: 1, key: 'button' },
+  { top: 300, left: 100, zIndex: 1, key: 'input' },
+]
+
+function renderCanvasDrop() {
+  const hook = renderHook(() => useCanvasDrop())
+  act(() => hook.result.current.setBlocks(INITIAL_BLOCKS))
+  return hook
+}
 
 function createDragEvent(overrides: Partial<DragEvent<HTMLDivElement>> = {}) {
   return {
@@ -18,10 +31,10 @@ function createDragEvent(overrides: Partial<DragEvent<HTMLDivElement>> = {}) {
 }
 
 describe('useCanvasDrop', () => {
-  it('initializes with blocks from editorData and container dimensions', () => {
+  it('initializes with empty blocks and default container dimensions', () => {
     const { result } = renderHook(() => useCanvasDrop())
 
-    expect(result.current.blocks.length).toBeGreaterThan(0)
+    expect(result.current.blocks.length).toBe(0)
     expect(result.current.container.width).toBe(800)
     expect(result.current.container.height).toBe(800)
     expect(result.current.isDragOver).toBe(false)
@@ -82,7 +95,7 @@ describe('useCanvasDrop', () => {
 
   describe('updateBlockPositions', () => {
     it('updates positions of specified blocks', () => {
-      const { result } = renderHook(() => useCanvasDrop())
+      const { result } = renderCanvasDrop()
 
       act(() => {
         result.current.updateBlockPositions([
@@ -95,7 +108,7 @@ describe('useCanvasDrop', () => {
     })
 
     it('does not update state when positions are unchanged', () => {
-      const { result } = renderHook(() => useCanvasDrop())
+      const { result } = renderCanvasDrop()
       const originalTop = result.current.blocks[0].top
       const originalLeft = result.current.blocks[0].left
       const blocksBefore = result.current.blocks
@@ -134,7 +147,7 @@ describe('useCanvasDrop', () => {
 
   describe('updateBlockPosition', () => {
     it('updates a single block position via convenience method', () => {
-      const { result } = renderHook(() => useCanvasDrop())
+      const { result } = renderCanvasDrop()
 
       act(() => result.current.updateBlockPosition(1, 111, 222))
 
@@ -154,7 +167,7 @@ describe('useCanvasDrop', () => {
 
   describe('commitMoveCommand', () => {
     it('records move and allows undo', () => {
-      const { result } = renderHook(() => useCanvasDrop())
+      const { result } = renderCanvasDrop()
       const originalTop = result.current.blocks[0].top
       const originalLeft = result.current.blocks[0].left
 
@@ -181,7 +194,7 @@ describe('useCanvasDrop', () => {
     })
 
     it('ignores commit when positions are unchanged', () => {
-      const { result } = renderHook(() => useCanvasDrop())
+      const { result } = renderCanvasDrop()
       const top = result.current.blocks[0].top
       const left = result.current.blocks[0].left
 

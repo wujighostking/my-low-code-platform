@@ -1,6 +1,6 @@
 import type { MouseEvent as ReactMouseEvent, RefObject } from 'react'
 import type { Block } from '@/hooks/useCanvasDrop'
-import { useCallback } from 'react'
+
 import { useCanvasSelection } from '@/hooks/useCanvasSelection'
 import { useCanvasSnapDrag } from '@/hooks/useCanvasSnapDrag'
 
@@ -31,7 +31,7 @@ export function useCanvasSelectionDrag(options: UseCanvasSelectionDragOptions) {
     stopDraggingSelection,
   } = useCanvasSelection()
 
-  const handleDragEnd = useCallback((startPositions: { index: number, top: number, left: number }[]) => {
+  const handleDragEnd = (startPositions: { index: number, top: number, left: number }[]) => {
     stopDraggingSelection()
     commitMoveCommand(startPositions.map(({ index, top, left }) => ({
       index,
@@ -40,7 +40,7 @@ export function useCanvasSelectionDrag(options: UseCanvasSelectionDragOptions) {
       toTop: blocks[index]?.top ?? top,
       toLeft: blocks[index]?.left ?? left,
     })))
-  }, [blocks, commitMoveCommand, stopDraggingSelection])
+  }
 
   const { guideLines, startDrag } = useCanvasSnapDrag({
     blocks,
@@ -50,7 +50,7 @@ export function useCanvasSelectionDrag(options: UseCanvasSelectionDragOptions) {
     onDragEnd: handleDragEnd,
   })
 
-  const handleBlockMouseDown = useCallback((event: ReactMouseEvent<HTMLDivElement>, index: number) => {
+  const handleBlockMouseDown = (event: ReactMouseEvent<HTMLDivElement>, index: number) => {
     event.stopPropagation()
     if (event.button !== 0)
       return
@@ -62,7 +62,7 @@ export function useCanvasSelectionDrag(options: UseCanvasSelectionDragOptions) {
     if (!isStarted)
       return
     startDraggingSelection(nextSelectedBlockIndexes)
-  }, [applySelection, getNextSelectedBlockIndexes, startDrag, startDraggingSelection])
+  }
 
   return {
     selectedBlockIndexes,

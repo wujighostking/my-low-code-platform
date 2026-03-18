@@ -1,7 +1,7 @@
 import type { UploadProps } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { Input, Modal, Segmented, Upload } from 'antd'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 const { TextArea } = Input
 const { Dragger } = Upload
@@ -22,7 +22,7 @@ function ImportModal({ open, onClose, onApply, title = '导入配置', placehold
   const [textValue, setTextValue] = useState('')
   const [fileContent, setFileContent] = useState('')
 
-  const handleAfterOpenChange = useCallback((visible: boolean) => {
+  const handleAfterOpenChange = (visible: boolean) => {
     if (visible) {
       if (defaultTextValue) {
         setMode('文本')
@@ -34,7 +34,7 @@ function ImportModal({ open, onClose, onApply, title = '导入配置', placehold
       }
       setFileContent('')
     }
-  }, [defaultTextValue])
+  }
 
   function reset() {
     setTextValue('')
