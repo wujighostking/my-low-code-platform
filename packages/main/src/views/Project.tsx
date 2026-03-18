@@ -79,7 +79,7 @@ function Project() {
       setModalOpen(false)
       setProjectName('')
       setProjectDesc('')
-      navigate('/', { state: { projectId: newProject.id } })
+      navigate('/', { state: { projectId: newProject.id, projectName: newProject.projectName } })
     }
     catch { /* request 拦截器已处理错误提示 */ }
     finally {
