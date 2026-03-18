@@ -18,7 +18,7 @@ export class ProjectsService {
   }
 
   findByUserId(userId: number) {
-    return this.projectRepository.findBy({ userId, isDeleted: false })
+    return this.projectRepository.find({ where: { userId, isDeleted: false }, order: { createdAt: 'DESC' } })
   }
 
   async findOne(id: number) {
