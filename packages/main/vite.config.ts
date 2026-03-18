@@ -11,6 +11,10 @@ export default defineConfig({
   },
   plugins: [
     UnoCss(),
-    react(),
+    react({
+      babel: {
+        plugins: ['babel-plugin-react-compiler'],
+      },
+    }),
   ],
 })
