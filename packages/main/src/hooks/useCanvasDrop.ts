@@ -21,27 +21,32 @@ interface BlockPositionUpdate {
 
 const DEFAULT_CONTAINER = { width: 800, height: 800 }
 
-export function useCanvasDrop(projectId?: number) {
+export function useCanvasDrop(projectId?: number, onLoadingChange?: (loading: boolean) => void) {
   const [isDragOver, setIsDragOver] = useState(false)
   const [blocks, setBlocks] = useState<Block[]>([])
   const [container, setContainer] = useState(DEFAULT_CONTAINER)
   const canvasRef = useRef<HTMLDivElement>(null)
+  const onLoadingChangeRef = useRef(onLoadingChange)
+  onLoadingChangeRef.current = onLoadingChange
 
   useEffect(() => {
     if (projectId == null)
       return
-    getProjectById(projectId).then((project) => {
-      if (!project.content)
-        return
-      try {
-        const data = JSON.parse(project.content)
-        if (!validateEditorData(data))
+    onLoadingChangeRef.current?.(true)
+    getProjectById(projectId)
+      .then((project) => {
+        if (!project.content)
           return
-        setContainer(data.container)
-        setBlocks(data.blocks)
-      }
-      catch { /* ignore invalid JSON */ }
-    })
+        try {
+          const data = JSON.parse(project.content)
+          if (!validateEditorData(data))
+            return
+          setContainer(data.container)
+          setBlocks(data.blocks)
+        }
+        catch { /* ignore invalid JSON */ }
+      })
+      .finally(() => onLoadingChangeRef.current?.(false))
   }, [projectId])
 
   const { width, height } = container
