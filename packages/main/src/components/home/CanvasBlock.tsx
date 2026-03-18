@@ -18,23 +18,18 @@ function CanvasBlock({ block, index, isEditing, isSelected, isDragging, setBlock
   if (!config)
     return null
 
+  const editingOnly = <T,>(handler: T): T | undefined => isEditing ? handler : undefined
+
   return (
     <div
       key={`${block.key}-${index}`}
       ref={element => setBlockElement(index, element)}
-      onMouseDown={isEditing ? event => onMouseDown(event, index) : undefined}
-      onContextMenu={isEditing ? event => onContextMenu(event, index) : undefined}
-      onClick={isEditing ? event => event.stopPropagation() : undefined}
-      className="rounded-md select-none"
-      style={{
-        position: 'absolute',
-        top: block.top,
-        left: block.left,
-        zIndex: block.zIndex,
-        transform: 'translate(-50%, -50%)',
-        cursor: isEditing ? (isDragging ? 'grabbing' : isSelected ? 'grab' : 'pointer') : 'default',
-        boxShadow: isEditing && isSelected ? '0 0 0 2px #1677ff' : 'none',
-      }}
+      onMouseDown={editingOnly((event: MouseEvent<HTMLDivElement>) => onMouseDown(event, index))}
+      onContextMenu={editingOnly((event: MouseEvent<HTMLDivElement>) => onContextMenu(event, index))}
+      onClick={editingOnly((event: MouseEvent<HTMLDivElement>) => event.stopPropagation())}
+      className={`absolute select-none rounded-md -translate-x-1/2 -translate-y-1/2 ${isEditing ? (isDragging ? 'cursor-grabbing' : isSelected ? 'cursor-grab' : 'cursor-pointer') : 'cursor-default'
+      }  ${isEditing && isSelected ? 'shadow-[0_0_0_2px_#1677ff]' : ''}`}
+      style={{ top: block.top, left: block.left, zIndex: block.zIndex }}
     >
       {config.render()}
     </div>
