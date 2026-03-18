@@ -4,6 +4,7 @@ export interface Project {
   id: number
   projectName: string
   content: string | null
+  description: string | null
   userId: number
 }
 
@@ -11,7 +12,7 @@ export function getProjects() {
   return request.get<unknown, Project[]>('/projects')
 }
 
-export function createProject(data: { projectName: string }) {
+export function createProject(data: { projectName: string, description?: string }) {
   return request.post<unknown, Project>('/projects', data)
 }
 

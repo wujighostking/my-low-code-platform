@@ -12,6 +12,7 @@ function Project() {
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
+  const [projectDesc, setProjectDesc] = useState('')
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -73,10 +74,11 @@ function Project() {
     }
     setCreating(true)
     try {
-      const newProject = await createProject({ projectName: projectName.trim() })
+      const newProject = await createProject({ projectName: projectName.trim(), description: projectDesc.trim() || undefined })
       message.success('创建成功')
       setModalOpen(false)
       setProjectName('')
+      setProjectDesc('')
       navigate('/', { state: { projectId: newProject.id } })
     }
     catch { /* request 拦截器已处理错误提示 */ }
@@ -126,6 +128,7 @@ function Project() {
         onCancel={() => {
           setModalOpen(false)
           setProjectName('')
+          setProjectDesc('')
         }}
         confirmLoading={creating}
         okText="创建"
@@ -135,6 +138,13 @@ function Project() {
           value={projectName}
           onChange={e => setProjectName(e.target.value)}
           onPressEnter={handleCreate}
+        />
+        <Input.TextArea
+          className="mt-3"
+          placeholder="请输入项目描述（选填）"
+          value={projectDesc}
+          onChange={e => setProjectDesc(e.target.value)}
+          rows={3}
         />
       </Modal>
     </div>

@@ -1,6 +1,6 @@
 import type { Project } from '@/api/projects'
 import { AppstoreOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
-import { Card } from 'antd'
+import { Card, Tooltip } from 'antd'
 
 interface ProjectCardProps {
   project: Project
@@ -23,11 +23,11 @@ function ProjectCard({ project, onView, onDelete }: ProjectCardProps) {
         <EditOutlined className="text-4 color-#999 hover:color-#667eea" onClick={() => onView(project)} />
         <DeleteOutlined className="text-4 color-#999 hover:color-red" onClick={() => onDelete(project)} />
       </div>
-      <p className="color-#999 text-3.5 m-0">
-        项目 ID:
-        {' '}
-        {project.id}
-      </p>
+      <Tooltip title={project.description}>
+        <p className="color-#999 text-3.5 m-0 line-clamp-2">
+          {project.description || '暂无描述'}
+        </p>
+      </Tooltip>
     </Card>
   )
 }

@@ -8,4 +8,8 @@ export class CreateProjectDto {
   @IsOptional()
   @IsString()
   content?: string
+
+  @IsOptional()
+  @IsString()
+  description?: string
 }

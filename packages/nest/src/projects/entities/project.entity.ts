@@ -12,6 +12,9 @@ export class Project {
   @Column({ type: 'text', nullable: true })
   content: string
 
+  @Column({ type: 'text', nullable: true })
+  description: string
+
   @ManyToOne(() => User)
   user: User
 
