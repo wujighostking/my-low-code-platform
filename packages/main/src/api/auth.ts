@@ -4,6 +4,10 @@ export function login(data: { username: string, password: string }) {
   return request.post<unknown, { access_token: string }>('/auth/login', data)
 }
 
+export function register(data: { username: string, password: string }) {
+  return request.post<unknown, { access_token: string }>('/auth/register', data)
+}
+
 export function checkToken() {
   return request.get('/auth/check')
 }

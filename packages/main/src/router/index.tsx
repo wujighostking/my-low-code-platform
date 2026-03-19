@@ -20,9 +20,9 @@ function toRoutePath(filePath: string) {
   return `/${kebabName}`
 }
 
-// 生成页面路由（排除 NotFound 和 Login）
+// 生成页面路由（排除 NotFound、Login 和 Register）
 const pageRoutes = Object.entries(viewModules)
-  .filter(([filePath]) => !filePath.endsWith('/NotFound.tsx') && !filePath.endsWith('/Login.tsx'))
+  .filter(([filePath]) => !filePath.endsWith('/NotFound.tsx') && !filePath.endsWith('/Login.tsx') && !filePath.endsWith('/Register.tsx'))
   .map(([filePath, loader]) => ({
     path: toRoutePath(filePath),
     element: toRouteElement(loader as ViewLoader),
@@ -38,10 +38,15 @@ const pageRoutes = Object.entries(viewModules)
     return a.path.localeCompare(b.path)
   })
 
-// Login 路由放在 layout 外（不需要心跳检测）
+// Login 和 Register 路由放在 layout 外（不需要心跳检测）
 const loginLoader = viewModules['../views/Login.tsx']
 const loginRoute = loginLoader
   ? [{ path: '/login', element: toRouteElement(loginLoader as ViewLoader) }]
+  : []
+
+const registerLoader = viewModules['../views/Register.tsx']
+const registerRoute = registerLoader
+  ? [{ path: '/register', element: toRouteElement(registerLoader as ViewLoader) }]
   : []
 
 // 单独挂载 404 兜底路由
@@ -56,6 +61,7 @@ const router = createBrowserRouter([
     children: pageRoutes,
   },
   ...loginRoute,
+  ...registerRoute,
   ...fallbackRoutes,
 ])
 
