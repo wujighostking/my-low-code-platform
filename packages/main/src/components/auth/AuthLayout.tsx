@@ -1,5 +1,5 @@
-import { Button, Card, Form, Spin } from 'antd'
 import type { ReactNode } from 'react'
+import { Button, Card, Form, Spin } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
 interface AuthLayoutProps {

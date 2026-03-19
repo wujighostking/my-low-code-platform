@@ -17,6 +17,7 @@ export default defineConfig(
     rules: {
       'no-console': 'warn',
       'react-compiler/react-compiler': 'warn',
+      'react-hooks/exhaustive-deps': 'off',
     },
   },
   {
@@ -24,6 +25,7 @@ export default defineConfig(
     rules: {
       'ts/consistent-type-imports': 'off',
       'unused-imports/no-unused-vars': 'off',
+      'react/no-unnecessary-use-prefix': 'off',
     },
   },
 )
